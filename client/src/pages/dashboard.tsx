@@ -8,6 +8,7 @@ import { UploadZone } from "@/components/upload-zone";
 import { DeliveryTable } from "@/components/delivery-table";
 import { ReportsSection } from "@/components/reports-section";
 import { apiRequest } from "@/lib/api";
+import type { DeliveryStats } from "@shared/schema";
 
 export default function Dashboard() {
   const [lastSync, setLastSync] = useState("2 min ago");
@@ -24,7 +25,7 @@ export default function Dashboard() {
   }, []);
 
   // Fetch delivery statistics
-  const { data: stats, isLoading: statsLoading } = useQuery({
+  const { data: stats, isLoading: statsLoading } = useQuery<DeliveryStats>({
     queryKey: ["/api/stats"],
     refetchInterval: 60000, // Auto-refresh every minute
   });

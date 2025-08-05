@@ -122,6 +122,10 @@ export class MemStorage implements IStorage {
     const delivery: Delivery = {
       ...insertDelivery,
       id,
+      status: insertDelivery.status || "pending",
+      responseTime: insertDelivery.responseTime || null,
+      newDeliveryDate: insertDelivery.newDeliveryDate || null,
+      rescheduleReason: insertDelivery.rescheduleReason || null,
       createdAt: now,
       updatedAt: now
     };
@@ -151,6 +155,10 @@ export class MemStorage implements IStorage {
     const session: UploadSession = {
       ...insertSession,
       id,
+      status: insertSession.status || "processing",
+      successCount: insertSession.successCount || 0,
+      errorCount: insertSession.errorCount || 0,
+      errors: insertSession.errors || null,
       createdAt: new Date()
     };
     this.uploadSessions.set(id, session);

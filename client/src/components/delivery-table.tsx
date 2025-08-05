@@ -31,12 +31,21 @@ const statusConfig = {
 
 export function DeliveryTable() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: deliveries = [], isLoading } = useQuery({
-    queryKey: ["/api/deliveries", { status: statusFilter, search: searchQuery }],
+    queryKey: ["/api/deliveries", statusFilter, searchQuery],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (statusFilter && statusFilter !== "all") params.append('status', statusFilter);
+      if (searchQuery) params.append('search', searchQuery);
+      
+      const response = await fetch(`/api/deliveries?${params.toString()}`);
+      if (!response.ok) throw new Error('Failed to fetch deliveries');
+      return response.json();
+    },
     refetchInterval: 60000, // Auto-refresh every minute
   });
 
@@ -124,7 +133,7 @@ export function DeliveryTable() {
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Status</SelectItem>
+              <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="confirmed">Confirmed</SelectItem>
               <SelectItem value="rescheduled">Rescheduled</SelectItem>
               <SelectItem value="pending">Pending</SelectItem>

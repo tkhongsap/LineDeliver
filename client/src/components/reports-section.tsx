@@ -19,7 +19,12 @@ export function ReportsSection() {
   });
 
   const { data: performance, isLoading: performanceLoading } = useQuery({
-    queryKey: ["/api/performance", { days: 7 }],
+    queryKey: ["/api/performance", 7],
+    queryFn: async () => {
+      const response = await fetch(`/api/performance?days=7`);
+      if (!response.ok) throw new Error('Failed to fetch performance data');
+      return response.json();
+    },
   });
 
   const { data: rescheduleReasons, isLoading: reasonsLoading } = useQuery({
