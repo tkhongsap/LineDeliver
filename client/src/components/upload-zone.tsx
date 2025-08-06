@@ -230,7 +230,7 @@ INVALID001,ORD-2024-0003,2024-01-24,นางสาวทดสอบ โรง�
   return (
     <div className="space-y-6">
       {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+      <div className="flex flex-col sm:flex-row gap-3 justify-start">
         <Button
           variant="outline"
           onClick={handleDownloadSampleCSV}
@@ -250,7 +250,7 @@ INVALID001,ORD-2024-0003,2024-01-24,นางสาวทดสอบ โรง�
       </div>
 
       {/* Helper Text */}
-      <p className="text-sm text-gray-500 text-center">
+      <p className="text-sm text-gray-500">
         Need sample data? Download our template file or load test data
       </p>
 
