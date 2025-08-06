@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CloudUpload, Info, CheckCircle, AlertCircle } from "lucide-react";
+import { CloudUpload, Info, CheckCircle, AlertCircle, Download, Database } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/api";
 
@@ -22,7 +22,11 @@ interface UploadSession {
   errors?: string;
 }
 
-export function UploadZone() {
+interface UploadZoneProps {
+  onSampleDataLoaded?: () => void;
+}
+
+export function UploadZone({ onSampleDataLoaded }: UploadZoneProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadSession, setUploadSession] = useState<UploadSession | null>(null);
@@ -158,8 +162,98 @@ export function UploadZone() {
     uploadMutation.mutate(file);
   };
 
+  // Load sample data mutation
+  const loadSampleDataMutation = useMutation({
+    mutationFn: async (): Promise<{ message: string; count: number }> => {
+      const response = await fetch("/api/load-sample-data", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to load sample data");
+      }
+      
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Sample Data Loaded",
+        description: `${data.count} sample customer records created successfully!`,
+      });
+      
+      // Invalidate customer records queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: ["/api/customer-records"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/customer-records/stats"] });
+      
+      // Call callback to switch tabs if provided
+      if (onSampleDataLoaded) {
+        setTimeout(() => {
+          onSampleDataLoaded();
+        }, 500);
+      }
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to Load Sample Data",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDownloadSampleCSV = () => {
+    // Create sample CSV content
+    const csvContent = `user_id,order_no,delivery_date,customer_name,phone,address,notes
+U1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p,ORD-2024-0001,2024-01-22,สมชาย ใจดี,0812345678,123 หมู่ 1 ตำบลบางกะปิ อำเภอเมือง กรุงเทพฯ 10110,โทรก่อนส่ง
+U2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q,ORD-2024-0002,2024-01-23,สมหญิง สวยงาม,0823456789,456 หมู่ 2 ตำบลคลองเตย เขตคลองเตย กรุงเทพฯ 10110,
+INVALID001,ORD-2024-0003,2024-01-24,นางสาวทดสอบ โรงแรม,0834567890,789 หมู่ 3 ตำบลมักกะสัน เขตราชเทวี กรุงเทพฯ 10400,ที่อยู่ไม่ถูกต้อง`;
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'sample-customer-data.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleLoadSampleData = () => {
+    loadSampleDataMutation.mutate();
+  };
+
   return (
     <div className="space-y-6">
+      {/* Action Buttons */}
+      <div className="flex flex-col sm:flex-row gap-3 justify-start">
+        <Button
+          variant="outline"
+          onClick={handleDownloadSampleCSV}
+          className="flex items-center gap-2"
+        >
+          <Download className="w-4 h-4" />
+          Download Sample CSV
+        </Button>
+        <Button
+          onClick={handleLoadSampleData}
+          disabled={loadSampleDataMutation.isPending}
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          <Database className="w-4 h-4" />
+          {loadSampleDataMutation.isPending ? "Loading..." : "Load Sample Data"}
+        </Button>
+      </div>
+
+      {/* Helper Text */}
+      <p className="text-sm text-gray-500">
+        Need sample data? Download our template file or load test data
+      </p>
+
       {/* Upload Zone */}
       <div
         className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${

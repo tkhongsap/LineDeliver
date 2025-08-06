@@ -21,6 +21,7 @@ import type { CustomerRecord } from "@shared/customer-schema";
 
 export default function Dashboard() {
   const [lastSync, setLastSync] = useState("2 min ago");
+  const [activeTab, setActiveTab] = useState("upload");
   
   // Customer Records state management
   const [selectedRecord, setSelectedRecord] = useState<CustomerRecord | null>(null);
@@ -82,6 +83,10 @@ export default function Dashboard() {
   const handleBulkMessage = (records: CustomerRecord[]) => {
     setBulkMessageRecords(records);
     setIsBulkMessageDialogOpen(true);
+  };
+
+  const handleSampleDataLoaded = () => {
+    setActiveTab("customers");
   };
 
   const handleUploadFile = () => {
@@ -173,7 +178,7 @@ export default function Dashboard() {
 
         {/* Main Content Tabs */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <Tabs defaultValue="upload" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="border-b border-gray-200">
               <TabsList className="h-auto p-0 bg-transparent border-0 rounded-none">
                 <TabsTrigger 
@@ -212,7 +217,7 @@ export default function Dashboard() {
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Upload Daily Deliveries</h2>
                 <p className="text-gray-600">Upload your daily delivery CSV or Excel file. Maximum file size: 5MB</p>
               </div>
-              <UploadZone />
+              <UploadZone onSampleDataLoaded={handleSampleDataLoaded} />
             </TabsContent>
 
             <TabsContent value="customers" className="p-8 mt-0">

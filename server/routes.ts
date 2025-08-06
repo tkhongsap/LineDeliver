@@ -191,6 +191,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Sample Data route
+  app.post("/api/load-sample-data", async (req, res) => {
+    try {
+      const result = await storage.loadSampleData();
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to load sample data" });
+    }
+  });
+
   // Customer Records routes
   app.use("/api/customer-records", customerRoutes);
 
@@ -198,26 +208,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   return httpServer;
 }
 
-// Simplified file processing function
+// File processing function - ready for real implementation
 async function processFileAsync(file: Express.Multer.File, sessionId: string) {
   try {
-    // Simulate file processing
+    // TODO: Implement actual file processing logic
+    // For now, we'll mark the session as ready for processing
+    // This should be replaced with actual CSV/Excel parsing and validation
+    
     setTimeout(async () => {
       await storage.updateUploadSession(sessionId, {
-        status: "completed",
-        totalRecords: 10,
-        successCount: 8,
-        errorCount: 2,
-        errors: JSON.stringify([
-          { row: 3, error: "Invalid date format" },
-          { row: 7, error: "Missing required field: user_id" }
-        ])
+        status: "pending", // Changed from "completed" to indicate it needs real implementation
+        totalRecords: 0,
+        successCount: 0,
+        errorCount: 0,
+        errors: JSON.stringify([])
       });
-    }, 2000);
+    }, 500); // Reduced timeout since we're not actually processing
+    
   } catch (error) {
     await storage.updateUploadSession(sessionId, {
       status: "failed",
-      errors: JSON.stringify([{ error: "Failed to process file" }])
+      errors: JSON.stringify([{ error: "File processing not yet implemented" }])
     });
   }
 }

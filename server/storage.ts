@@ -34,6 +34,9 @@ export interface IStorage {
   getMessageTemplates(): Promise<MessageTemplate[]>;
   createMessageTemplate(template: InsertMessageTemplate): Promise<MessageTemplate>;
   updateMessageTemplate(id: string, updates: Partial<MessageTemplate>): Promise<MessageTemplate | undefined>;
+  
+  // Sample Data methods
+  loadSampleData(): Promise<{ count: number; message: string }>;
 }
 
 export class MemStorage implements IStorage {
@@ -48,71 +51,8 @@ export class MemStorage implements IStorage {
     this.customerRecords = new Map();
     this.messageTemplates = new Map();
     
-    // Initialize with sample data for demonstration
-    this.initializeSampleData();
-    this.initializeCustomerSampleData();
-    this.initializeMessageTemplates();
-  }
-
-  private initializeSampleData() {
-    const sampleDeliveries: Delivery[] = [
-      {
-        id: "1",
-        orderId: "ORD-2024-001",
-        userId: "U1234567890",
-        customerName: "สมชาย โจ๊ะ",
-        deliveryDate: "2024-01-20",
-        status: "confirmed",
-        responseTime: new Date("2024-01-18T09:15:23Z"),
-        newDeliveryDate: null,
-        rescheduleReason: null,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: "2",
-        orderId: "ORD-2024-002",
-        userId: "U1234567891",
-        customerName: "สมหญิง รักดี",
-        deliveryDate: "2024-01-20",
-        status: "rescheduled",
-        responseTime: new Date("2024-01-18T10:30:45Z"),
-        newDeliveryDate: "2024-01-22",
-        rescheduleReason: "Not available",
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: "3",
-        orderId: "ORD-2024-003",
-        userId: "U1234567892",
-        customerName: "วิชัย ชื่นคิด",
-        deliveryDate: "2024-01-20",
-        status: "pending",
-        responseTime: null,
-        newDeliveryDate: null,
-        rescheduleReason: null,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: "4",
-        orderId: "ORD-2024-004",
-        userId: "U1234567893",
-        customerName: "มาลี สุขสวย",
-        deliveryDate: "2024-01-21",
-        status: "no-response",
-        responseTime: null,
-        newDeliveryDate: null,
-        rescheduleReason: null,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
-    ];
-
-    sampleDeliveries.forEach(delivery => {
-      this.deliveries.set(delivery.id, delivery);
-    });
+    // Always initialize default message template (required for LINE functionality)
+    this.initializeDefaultMessageTemplate();
   }
 
   async getDelivery(id: string): Promise<Delivery | undefined> {
@@ -265,55 +205,8 @@ export class MemStorage implements IStorage {
   }
 
   // Customer Records Methods Implementation
-  private initializeCustomerSampleData() {
-    const sampleCustomerRecords: CustomerRecord[] = [
-      {
-        id: "cr-001",
-        customerName: "สมชาย สุขใจ",
-        phone: "+66-81-234-5678",
-        lineUserId: "U1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6",
-        orderNumber: "ORD-2024-0001",
-        deliveryDate: "2024-01-22",
-        deliveryAddress: "123 ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพฯ 10110",
-        notes: "โทรก่อนส่งของ",
-        status: "ready",
-        lastModified: new Date(),
-        createdAt: new Date()
-      },
-      {
-        id: "cr-002",
-        customerName: "สมหญิง สวยงาม",
-        phone: "+66-82-345-6789",
-        lineUserId: "U2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7",
-        orderNumber: "ORD-2024-0002",
-        deliveryDate: "2024-01-22",
-        deliveryAddress: "456 ถนนรัชดาภิเษก แขวงดินแดง เขตดินแดง กรุงเทพฯ 10400",
-        notes: "",
-        status: "ready",
-        lastModified: new Date(),
-        createdAt: new Date()
-      },
-      {
-        id: "cr-003",
-        customerName: "นางสาวทดสอบ โรงแรม",
-        phone: "+66-83-456-7890",
-        lineUserId: "INVALID001",
-        orderNumber: "ORD-2024-0003",
-        deliveryDate: "2024-01-23",
-        deliveryAddress: "789 ถนนเพชรบุรี แขวงมักกะสัน เขตราชเทวี กรุงเทพฯ 10400",
-        notes: "ที่อยู่ไม่ถูกต้อง",
-        status: "invalid",
-        lastModified: new Date(),
-        createdAt: new Date()
-      }
-    ];
 
-    sampleCustomerRecords.forEach(record => {
-      this.customerRecords.set(record.id, record);
-    });
-  }
-
-  private initializeMessageTemplates() {
+  private initializeDefaultMessageTemplate() {
     const defaultTemplate: MessageTemplate = {
       id: "tpl-001",
       templateId: "delivery_confirmation",
@@ -337,6 +230,62 @@ Quick Reply:
     };
 
     this.messageTemplates.set(defaultTemplate.id, defaultTemplate);
+  }
+
+  async loadSampleData(): Promise<{ count: number; message: string }> {
+    // Clear existing customer records first
+    this.customerRecords.clear();
+    
+    const sampleCustomerRecords: CustomerRecord[] = [
+      {
+        id: "cr-001",
+        customerName: "สมชาย ใจดี",
+        phone: "+66-81-234-5678",
+        lineUserId: "U1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p",
+        orderNumber: "ORD-2024-0001",
+        deliveryDate: "2024-01-22",
+        deliveryAddress: "123 หมู่ 1 ตำบลบางกะปิ อำเภอเมือง กรุงเทพฯ 10110",
+        notes: "โทรก่อนส่ง",
+        status: "ready",
+        lastModified: new Date(),
+        createdAt: new Date()
+      },
+      {
+        id: "cr-002",
+        customerName: "สมหญิง สวยงาม",
+        phone: "+66-82-345-6789",
+        lineUserId: "U2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q",
+        orderNumber: "ORD-2024-0002",
+        deliveryDate: "2024-01-23",
+        deliveryAddress: "456 หมู่ 2 ตำบลคลองเตย เขตคลองเตย กรุงเทพฯ 10110",
+        notes: "",
+        status: "ready",
+        lastModified: new Date(),
+        createdAt: new Date()
+      },
+      {
+        id: "cr-003",
+        customerName: "นางสาวทดสอบ โรงแรม",
+        phone: "+66-83-456-7890",
+        lineUserId: "INVALID001",
+        orderNumber: "ORD-2024-0003",
+        deliveryDate: "2024-01-24",
+        deliveryAddress: "789 หมู่ 3 ตำบลมักกะสัน เขตราชเทวี กรุงเทพฯ 10400",
+        notes: "ที่อยู่ไม่ถูกต้อง",
+        status: "invalid",
+        lastModified: new Date(),
+        createdAt: new Date()
+      }
+    ];
+
+    sampleCustomerRecords.forEach(record => {
+      this.customerRecords.set(record.id, record);
+    });
+
+    return {
+      count: sampleCustomerRecords.length,
+      message: `Successfully loaded ${sampleCustomerRecords.length} sample customer records`
+    };
   }
 
   async getCustomerRecord(id: string): Promise<CustomerRecord | undefined> {
