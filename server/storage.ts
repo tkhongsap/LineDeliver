@@ -48,10 +48,15 @@ export class MemStorage implements IStorage {
     this.customerRecords = new Map();
     this.messageTemplates = new Map();
     
-    // Initialize with sample data for demonstration
-    this.initializeSampleData();
-    this.initializeCustomerSampleData();
-    this.initializeMessageTemplates();
+    // Always initialize default message template (required for LINE functionality)
+    this.initializeDefaultMessageTemplate();
+    
+    // Initialize with sample data only in development if enabled
+    if (process.env.NODE_ENV === 'development' && process.env.ENABLE_SAMPLE_DATA === 'true') {
+      this.initializeSampleData();
+      this.initializeCustomerSampleData();
+      this.initializeMessageTemplates();
+    }
   }
 
   private initializeSampleData() {
@@ -313,7 +318,7 @@ export class MemStorage implements IStorage {
     });
   }
 
-  private initializeMessageTemplates() {
+  private initializeDefaultMessageTemplate() {
     const defaultTemplate: MessageTemplate = {
       id: "tpl-001",
       templateId: "delivery_confirmation",
@@ -337,6 +342,11 @@ Quick Reply:
     };
 
     this.messageTemplates.set(defaultTemplate.id, defaultTemplate);
+  }
+
+  private initializeMessageTemplates() {
+    // This method is kept for development sample data
+    // The default template is now handled by initializeDefaultMessageTemplate()
   }
 
   async getCustomerRecord(id: string): Promise<CustomerRecord | undefined> {

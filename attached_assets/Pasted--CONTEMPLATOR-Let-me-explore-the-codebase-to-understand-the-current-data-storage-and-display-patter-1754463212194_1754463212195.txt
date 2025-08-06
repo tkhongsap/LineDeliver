@@ -1,0 +1,127 @@
+<CONTEMPLATOR>
+Let me explore the codebase to understand the current data storage and display patterns, identify where mockup/test data exists, and then propose plans to remove it while maintaining all functionality.
+
+I'll start by examining the structure of the codebase and then look for patterns of mock data usage.
+</CONTEMPLATOR>
+Ran tool
+Search files...
+Search files...
+Search files...
+Now let me examine the specific mock data initialization methods and look at the database configuration:
+Read file: /home/runner/workspace/server/storage.ts
+Read file: /home/runner/workspace/server/storage.ts
+Read file: /home/runner/workspace/drizzle.config.ts
+Now let me check if there's already a database implementation and examine the current server setup:
+Ran tool
+Ran tool
+Ran tool
+Let me examine the server directory structure and look for any existing database implementation:
+Ran tool
+Read file: /home/runner/workspace/package.json
+Let me continue reading the package.json to see the database-related dependencies:
+Read file: /home/runner/workspace/package.json
+Now let me check if there are any existing database migrations or PostgreSQL implementations:
+Ran tool
+Search files...
+Now let me check the shared schema files to understand the complete data model:
+Read file: /home/runner/workspace/shared/schema.ts
+Read file: /home/runner/workspace/shared/customer-schema.ts
+Now I have a comprehensive understanding of the codebase. Let me create a structured plan for removing mock data:
+Ran tool
+<FINAL_ANSWER>
+
+Based on my analysis of the codebase, I understand how data is currently stored and displayed. Here's what I found:
+
+## Current Data Storage Architecture
+
+**Storage Pattern**: The application uses an interface-based storage pattern (`IStorage`) with an in-memory implementation (`MemStorage`) that contains hardcoded mock data.
+
+**Mock Data Locations**:
+1. **Delivery Data**: `initializeSampleData()` - 4 sample Thai delivery records
+2. **Customer Records**: `initializeCustomerSampleData()` - 3 sample Thai customer records  
+3. **Message Templates**: `initializeMessageTemplates()` - 1 default LINE message template
+
+**Database Setup**: 
+- PostgreSQL schemas are defined using Drizzle ORM
+- Database connection configured but not implemented
+- All dependencies are installed (@neondatabase/serverless, drizzle-orm, etc.)
+
+## Implementation Plans
+
+### **Plan A: Clean Slate Approach (RECOMMENDED)**
+**Strategy**: Remove all mock data initialization and start with empty data stores.
+
+**Pros**:
+- Cleanest implementation
+- No residual test data
+- Forces proper testing with real data
+- Minimal code changes
+
+**Implementation**:
+1. Remove all mock data initialization methods
+2. Start with empty Maps in MemStorage constructor  
+3. Keep the interface intact for future database migration
+4. Add environment flag to optionally enable sample data for development
+
+**Changes Required**:
+- Modify `MemStorage` constructor in `server/storage.ts`
+- Remove: `initializeSampleData()`, `initializeCustomerSampleData()`, `initializeMessageTemplates()`
+- Frontend will show empty states initially
+
+### **Plan B: Database Migration Approach**  
+**Strategy**: Implement PostgreSQL database and remove in-memory storage entirely.
+
+**Pros**:
+- Production-ready solution
+- Proper data persistence
+- Scalable architecture
+- No mock data concerns
+
+**Implementation**:
+1. Create database implementation class
+2. Set up Drizzle migrations
+3. Replace MemStorage with DatabaseStorage
+4. Configure DATABASE_URL environment variable
+
+**Changes Required**:
+- Create new `DatabaseStorage` class implementing `IStorage`
+- Generate and run database migrations
+- Update storage instantiation in `server/storage.ts`
+- Configure database connection
+
+### **Plan C: Hybrid Approach**
+**Strategy**: Keep MemStorage but make mock data optional via environment variable.
+
+**Pros**:
+- Maintains development flexibility
+- Easy to toggle between modes
+- Gradual transition possible
+
+**Implementation**:
+1. Add `ENABLE_SAMPLE_DATA` environment variable
+2. Conditionally initialize mock data based on environment
+3. Default to no sample data in production
+
+**Changes Required**:
+- Add environment variable check in constructor
+- Modify initialization logic
+- Update documentation
+
+## **My Recommendation: Plan A (Clean Slate)**
+
+I recommend **Plan A** because:
+
+1. **Simplicity**: Minimal code changes with maximum impact
+2. **Testing**: Forces you to test with real data immediately  
+3. **Clean Architecture**: Maintains the excellent interface pattern for future database migration
+4. **No Side Effects**: Eliminates any chance of mock data contaminating real data
+
+**Implementation Steps**:
+1. Remove mock data initialization methods
+2. Start with empty data stores
+3. Add optional development sample data flag
+4. Test all functionality with real uploaded data
+
+Would you like me to proceed with **Plan A**, or would you prefer one of the other approaches? I can implement whichever plan you think best fits your needs.
+
+</FINAL_ANSWER>
