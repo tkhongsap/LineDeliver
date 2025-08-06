@@ -1,6 +1,6 @@
 # Overview
 
-This is a LINE OA (Official Account) Delivery Dashboard for ThaiBev's customer service operations. The application manages delivery confirmations and reschedules through LINE messaging integration, providing a comprehensive dashboard for tracking delivery statuses, uploading delivery data, and generating reports. The system features real-time status tracking, automated messaging capabilities, and analytics reporting with a ThaiBev-inspired design using emerald green and gold color schemes.
+This is a comprehensive ThaiBev customer service portal featuring both LINE OA (Official Account) delivery management and customer records management. The application manages delivery confirmations and reschedules through LINE messaging integration, while providing advanced customer records management with Thai language support, inline editing, and bulk messaging capabilities. The system features real-time status tracking, automated messaging capabilities, analytics reporting, and a modern customer records interface with search, filtering, and CRUD operations, all designed with a ThaiBev-inspired emerald green and gold color scheme.
 
 # User Preferences
 
@@ -17,26 +17,27 @@ The client uses a modern React stack with TypeScript, built around a single-page
 - **Styling**: Tailwind CSS with custom ThaiBev color scheme variables
 - **Build Tool**: Vite for fast development and optimized production builds
 
-The dashboard features a tabbed interface with four main sections: Upload, Dashboard, Reports, and a statistics overview. Components are organized in a modular structure with reusable UI components and custom business logic components.
+The dashboard features a tabbed interface with four main sections: Upload, Dashboard, Reports, and a statistics overview, plus a dedicated Customer Records management system. Components are organized in a modular structure with reusable UI components and custom business logic components. The customer records system includes comprehensive CRUD operations, Thai language validation, real-time search and filtering, and integration with LINE messaging for bulk communications.
 
 ## Backend Architecture
 The server follows a RESTful API design pattern using Express.js:
 - **Framework**: Express.js with TypeScript
 - **Database Layer**: In-memory storage implementation (MemStorage) that can be easily replaced with database persistence
 - **File Upload**: Multer middleware for handling CSV/XLS/XLSX file uploads with validation
-- **API Structure**: RESTful endpoints for deliveries, upload sessions, statistics, and export functionality
+- **API Structure**: RESTful endpoints for deliveries, upload sessions, statistics, export functionality, and comprehensive customer records management
+- **Customer Records API**: Full CRUD operations with pagination, search, filtering, bulk operations, and statistics endpoints
 - **Development Setup**: Vite integration for seamless development experience
 
-The backend uses an interface-based storage pattern (IStorage) allowing for easy migration from in-memory storage to database persistence without changing business logic.
+The backend uses an interface-based storage pattern (IStorage) allowing for easy migration from in-memory storage to database persistence without changing business logic. Customer records are managed through dedicated API routes with comprehensive validation and error handling.
 
 ## Data Storage Solutions
 Currently implements in-memory storage with a well-defined interface for easy migration:
 - **Schema Definition**: Drizzle ORM schemas for PostgreSQL (configured but not yet implemented)
-- **Data Models**: Deliveries and upload sessions with proper TypeScript typing
+- **Data Models**: Deliveries, upload sessions, customer records, and message templates with proper TypeScript typing
 - **Migration Ready**: Drizzle configuration points to PostgreSQL with migration support
-- **Sample Data**: Pre-populated with demonstration data for immediate functionality
+- **Sample Data**: Pre-populated with demonstration data for immediate functionality including Thai customer data
 
-The schema includes delivery tracking (order ID, customer info, status, response times) and upload session management (file processing, success/error counts).
+The schema includes delivery tracking (order ID, customer info, status, response times), upload session management (file processing, success/error counts), customer records management (Thai names, LINE user IDs, delivery addresses, phone numbers), and message template storage for LINE OA integration.
 
 ## Authentication and Authorization
 Currently no authentication is implemented - the application operates as an internal tool. The architecture supports adding authentication layers without significant refactoring.
