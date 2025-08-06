@@ -2,6 +2,8 @@ import { useState } from "react";
 import { EnhancedStatsCards } from "@/components/enhanced-stats-cards";
 import { CustomerRecordsTable } from "@/components/customers/customer-records-table";
 import { CustomerRecordForm } from "@/components/customers/customer-record-form";
+import { MessagePreviewDialog } from "@/components/customers/message-preview-dialog";
+import { BulkMessageDialog } from "@/components/customers/bulk-message-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +17,10 @@ export default function CustomerRecords() {
   const [selectedRecord, setSelectedRecord] = useState<CustomerRecord | null>(null);
   const [formMode, setFormMode] = useState<"create" | "edit" | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [messageRecord, setMessageRecord] = useState<CustomerRecord | null>(null);
+  const [isMessageDialogOpen, setIsMessageDialogOpen] = useState(false);
+  const [bulkMessageRecords, setBulkMessageRecords] = useState<CustomerRecord[]>([]);
+  const [isBulkMessageDialogOpen, setIsBulkMessageDialogOpen] = useState(false);
 
   const { data: customerStats, isLoading: customerStatsLoading } = useCustomerRecordsStats();
   const { data: deliveryStats, isLoading: deliveryStatsLoading } = useQuery<DeliveryStats>({
@@ -46,8 +52,13 @@ export default function CustomerRecords() {
   };
 
   const handleSendMessage = (record: CustomerRecord) => {
-    // TODO: Implement message sending functionality
-    console.log("Send message to:", record);
+    setMessageRecord(record);
+    setIsMessageDialogOpen(true);
+  };
+
+  const handleBulkMessage = (records: CustomerRecord[]) => {
+    setBulkMessageRecords(records);
+    setIsBulkMessageDialogOpen(true);
   };
 
   const handleUploadFile = () => {
@@ -145,6 +156,7 @@ export default function CustomerRecords() {
         onEditRecord={handleEditRecord}
         onViewRecord={handleViewRecord}
         onSendMessage={handleSendMessage}
+        onBulkMessage={handleBulkMessage}
         onUploadFile={handleUploadFile}
         onExportData={handleExportData}
       />
@@ -165,6 +177,30 @@ export default function CustomerRecords() {
           />
         </DialogContent>
       </Dialog>
+
+      {/* Message Preview Dialog */}
+      {messageRecord && (
+        <MessagePreviewDialog
+          isOpen={isMessageDialogOpen}
+          onClose={() => setIsMessageDialogOpen(false)}
+          customer={messageRecord}
+          onSendMessage={(template, customer) => {
+            // TODO: Implement actual LINE messaging
+            console.log("Sending message:", template, customer);
+          }}
+        />
+      )}
+
+      {/* Bulk Message Dialog */}
+      <BulkMessageDialog
+        isOpen={isBulkMessageDialogOpen}
+        onClose={() => setIsBulkMessageDialogOpen(false)}
+        customers={bulkMessageRecords}
+        onSendBulkMessage={(template, customers, customMessage) => {
+          // TODO: Implement actual bulk LINE messaging
+          console.log("Sending bulk message:", template, customers, customMessage);
+        }}
+      />
     </div>
   );
 }

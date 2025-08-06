@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CustomerRow } from "./customer-row";
 import { 
   Search, 
   Filter, 
@@ -31,6 +32,7 @@ interface CustomerRecordsTableProps {
   onEditRecord?: (record: CustomerRecord) => void;
   onViewRecord?: (record: CustomerRecord) => void;
   onSendMessage?: (record: CustomerRecord) => void;
+  onBulkMessage?: (records: CustomerRecord[]) => void;
   onCreateRecord?: () => void;
   onUploadFile?: () => void;
   onExportData?: () => void;
@@ -40,6 +42,7 @@ export function CustomerRecordsTable({
   onEditRecord,
   onViewRecord,
   onSendMessage,
+  onBulkMessage,
   onCreateRecord,
   onUploadFile,
   onExportData
@@ -206,15 +209,29 @@ export function CustomerRecordsTable({
             </SelectContent>
           </Select>
           {selectedRecords.size > 0 && (
-            <Button
-              onClick={handleBulkDelete}
-              variant="destructive"
-              size="sm"
-              disabled={bulkDeleteMutation.isPending}
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete ({selectedRecords.size})
-            </Button>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const selectedCustomers = records.filter(record => selectedRecords.has(record.id));
+                  onBulkMessage?.(selectedCustomers);
+                }}
+                className="text-green-600 border-green-600 hover:bg-green-50"
+              >
+                <MessageCircle className="w-4 h-4 mr-1" />
+                Send Messages ({selectedRecords.size})
+              </Button>
+              <Button
+                onClick={handleBulkDelete}
+                variant="destructive"
+                size="sm"
+                disabled={bulkDeleteMutation.isPending}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete ({selectedRecords.size})
+              </Button>
+            </div>
           )}
         </div>
 
@@ -288,63 +305,13 @@ export function CustomerRecordsTable({
                 </TableRow>
               ) : (
                 records.map((record) => (
-                  <TableRow key={record.id}>
-                    <TableCell>
-                      <Checkbox
-                        checked={selectedRecords.has(record.id)}
-                        onCheckedChange={(checked) => handleSelectRecord(record.id, checked as boolean)}
-                      />
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {record.customerName}
-                    </TableCell>
-                    <TableCell className="font-mono text-sm">
-                      {record.phone || "—"}
-                    </TableCell>
-                    <TableCell className="font-mono text-sm">
-                      {record.lineUserId}
-                    </TableCell>
-                    <TableCell>{record.orderNumber}</TableCell>
-                    <TableCell>{record.deliveryDate}</TableCell>
-                    <TableCell>
-                      <Badge variant={getStatusBadgeVariant(record.status)}>
-                        {getStatusLabel(record.status)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm text-gray-500">
-                      {new Date(record.lastModified).toLocaleDateString('th-TH')}
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => onViewRecord?.(record)}>
-                            <Eye className="w-4 h-4 mr-2" />
-                            View
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => onEditRecord?.(record)}>
-                            <Edit className="w-4 h-4 mr-2" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => onSendMessage?.(record)}>
-                            <MessageCircle className="w-4 h-4 mr-2" />
-                            Send Message
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => handleDeleteRecord(record.id)}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
+                  <CustomerRow
+                    key={record.id}
+                    record={record}
+                    isSelected={selectedRecords.has(record.id)}
+                    onSelect={handleSelectRecord}
+                    onEdit={(record) => onEditRecord?.(record)}
+                  />
                 ))
               )}
             </TableBody>
