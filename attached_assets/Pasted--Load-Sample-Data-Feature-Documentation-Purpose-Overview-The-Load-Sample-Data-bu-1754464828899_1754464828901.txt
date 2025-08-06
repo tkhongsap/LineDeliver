@@ -1,0 +1,158 @@
+# "Load Sample Data" Feature Documentation
+
+## **Purpose & Overview**
+
+The "Load Sample Data" button is a **development and testing utility** that allows users to quickly populate the system with realistic sample customer data without needing to upload an actual CSV file.
+
+## **How It Works**
+
+### **When You Click "Load Sample Data":**
+
+1. **Instant Data Generation**: The system creates 3 sample customer records with realistic Thai customer data
+2. **Bypasses File Upload**: No file processing or validation - data is loaded directly into memory
+3. **Activates Customer Records Tab**: Automatically enables and switches to the "Customer Records" tab
+4. **Populates Table**: Sample data appears in the customer management table
+
+
+### **Sample Data Structure**
+
+```javascript
+// 3 records are created with this structure:
+{
+  user_id: "U1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p",     // Valid LINE User ID
+  order_no: "ORD-2024-0001",                          // Order number
+  delivery_date: "2024-01-22",                        // Delivery date
+  customer_name: "สมชาย ใจดี",                        // Thai customer name
+  phone: "0812345678",                                 // Thai phone number
+  address: "123 หมู่ 1 ตำบลบางกะปิ อำเภอเมือง...",    // Thai address
+  notes: "โทรก่อนส่ง"                                  // Delivery notes
+}
+```
+
+## **What Happens in the App**
+
+### **Step-by-Step Flow:**
+
+1. **Button Click** → User clicks "Load Sample Data" button
+2. **Data Creation** → System generates 3 sample records instantly
+3. **Tab Activation** → "Customer Records" tab becomes enabled and clickable
+4. **Auto-Switch** → App automatically switches to "Customer Records" tab after 0.5 seconds
+5. **Data Display** → Sample data appears in the table with different statuses:
+
+1. Record 1: **"Ready"** status (green badge)
+2. Record 2: **"Ready"** status (green badge)
+3. Record 3: **"Invalid"** status (red badge) - for testing error handling
+
+
+
+
+
+### **Visual Changes:**
+
+- ✅ Tab counter updates: "Customer Records (3)"
+- ✅ Statistics cards show: 2 Ready, 0 Edited, 1 Invalid
+- ✅ Table populates with sample Thai customer data
+- ✅ All editing, preview, and bulk operations become functional
+
+
+## **Primary Use Cases**
+
+### **1. Development & Testing**
+
+- **Developers**: Test features without creating CSV files
+- **QA Team**: Quickly generate test data for various scenarios
+- **Demo Purposes**: Show functionality to stakeholders
+
+
+### **2. Training & Onboarding**
+
+- **New Staff**: Learn the system without real customer data
+- **Training Sessions**: Demonstrate workflows safely
+- **User Acceptance Testing**: Test all features with sample data
+
+
+### **3. Troubleshooting**
+
+- **Debug Issues**: Isolate problems from file upload vs. data processing
+- **Feature Testing**: Test editing, preview, and send confirmation flows
+- **Performance Testing**: Measure system response with known data set
+
+
+## **Complete Workflow After Loading**
+
+### **What Users Can Do Next:**
+
+1. **View Records**: See all 3 sample customers in the table
+2. **Edit Records**: Click edit button to modify customer information
+3. **Preview Messages**: Click eye icon to see LINE message preview
+4. **Search/Filter**: Test search functionality with sample names
+5. **Bulk Operations**: Select records and test bulk actions
+6. **Send Confirmation**: Click "Review & Send" to see the confirmation dialog
+7. **Message Template**: View the standard LINE message template
+
+
+### **Sample Data Includes:**
+
+- **Valid Records**: 2 customers ready for message sending
+- **Invalid Record**: 1 customer with invalid LINE ID (for error testing)
+- **Thai Content**: Realistic Thai names, addresses, and notes
+- **Various Scenarios**: Different delivery dates and special instructions
+
+
+## **Benefits for Your Team**
+
+### **For Developers:**
+
+- **Fast Testing**: No need to create CSV files repeatedly
+- **Consistent Data**: Same test data every time for reliable testing
+- **Error Scenarios**: Built-in invalid record for error handling tests
+
+
+### **For Designers:**
+
+- **UI Testing**: See how real Thai content looks in the interface
+- **Layout Validation**: Test responsive design with actual data
+- **User Flow**: Experience complete workflow without setup
+
+
+### **For QA Team:**
+
+- **Quick Setup**: Instant test environment setup
+- **Regression Testing**: Consistent baseline for testing
+- **Feature Validation**: Test all customer management features
+
+
+### **For Training:**
+
+- **Safe Environment**: No risk of affecting real customer data
+- **Realistic Experience**: Thai language content matches production
+- **Complete Workflow**: Can test entire process from data to message sending
+
+
+## ️ **Important Notes**
+
+### **Development Tool Only:**
+
+- This button is primarily for **development and testing**
+- In production, it could be **hidden or removed** for regular users
+- **Not meant for real customer data processing**
+
+
+### **Data Persistence:**
+
+- Sample data exists **only in browser memory**
+- **Refreshing the page** will clear the sample data
+- **Not saved to database** - purely for testing UI functionality
+
+
+### **Security Considerations:**
+
+- Sample data uses **fake LINE User IDs**
+- **No real customer information** is involved
+- Safe for **training and demonstration** purposes
+
+
+## **Tell Your Team:**
+
+> *"The Load Sample Data button is a development utility that instantly creates 3 realistic Thai customer records for testing. It bypasses file upload and lets the team test all customer management features immediately. Perfect for development, training, and demos - no CSV files needed!"*
+

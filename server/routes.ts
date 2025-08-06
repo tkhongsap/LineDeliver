@@ -191,6 +191,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Sample Data route
+  app.post("/api/load-sample-data", async (req, res) => {
+    try {
+      const result = await storage.loadSampleData();
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to load sample data" });
+    }
+  });
+
   // Customer Records routes
   app.use("/api/customer-records", customerRoutes);
 

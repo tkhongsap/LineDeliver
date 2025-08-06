@@ -34,6 +34,9 @@ export interface IStorage {
   getMessageTemplates(): Promise<MessageTemplate[]>;
   createMessageTemplate(template: InsertMessageTemplate): Promise<MessageTemplate>;
   updateMessageTemplate(id: string, updates: Partial<MessageTemplate>): Promise<MessageTemplate | undefined>;
+  
+  // Sample Data methods
+  loadSampleData(): Promise<{ count: number; message: string }>;
 }
 
 export class MemStorage implements IStorage {
@@ -227,6 +230,62 @@ Quick Reply:
     };
 
     this.messageTemplates.set(defaultTemplate.id, defaultTemplate);
+  }
+
+  async loadSampleData(): Promise<{ count: number; message: string }> {
+    // Clear existing customer records first
+    this.customerRecords.clear();
+    
+    const sampleCustomerRecords: CustomerRecord[] = [
+      {
+        id: "cr-001",
+        customerName: "สมชาย ใจดี",
+        phone: "+66-81-234-5678",
+        lineUserId: "U1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p",
+        orderNumber: "ORD-2024-0001",
+        deliveryDate: "2024-01-22",
+        deliveryAddress: "123 หมู่ 1 ตำบลบางกะปิ อำเภอเมือง กรุงเทพฯ 10110",
+        notes: "โทรก่อนส่ง",
+        status: "ready",
+        lastModified: new Date(),
+        createdAt: new Date()
+      },
+      {
+        id: "cr-002",
+        customerName: "สมหญิง สวยงาม",
+        phone: "+66-82-345-6789",
+        lineUserId: "U2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q",
+        orderNumber: "ORD-2024-0002",
+        deliveryDate: "2024-01-23",
+        deliveryAddress: "456 หมู่ 2 ตำบลคลองเตย เขตคลองเตย กรุงเทพฯ 10110",
+        notes: "",
+        status: "ready",
+        lastModified: new Date(),
+        createdAt: new Date()
+      },
+      {
+        id: "cr-003",
+        customerName: "นางสาวทดสอบ โรงแรม",
+        phone: "+66-83-456-7890",
+        lineUserId: "INVALID001",
+        orderNumber: "ORD-2024-0003",
+        deliveryDate: "2024-01-24",
+        deliveryAddress: "789 หมู่ 3 ตำบลมักกะสัน เขตราชเทวี กรุงเทพฯ 10400",
+        notes: "ที่อยู่ไม่ถูกต้อง",
+        status: "invalid",
+        lastModified: new Date(),
+        createdAt: new Date()
+      }
+    ];
+
+    sampleCustomerRecords.forEach(record => {
+      this.customerRecords.set(record.id, record);
+    });
+
+    return {
+      count: sampleCustomerRecords.length,
+      message: `Successfully loaded ${sampleCustomerRecords.length} sample customer records`
+    };
   }
 
   async getCustomerRecord(id: string): Promise<CustomerRecord | undefined> {
