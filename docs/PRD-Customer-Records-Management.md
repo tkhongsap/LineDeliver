@@ -1,582 +1,503 @@
-# Customer Records Management Feature - Product Requirements Document (PRD)
+# Product Requirements Document (PRD)
 
-**Version:** 2.0  
-**Author:** Development Team  
-**Date:** January 2025  
-**Project:** LINE OA Delivery Dashboard - ThaiBev  
-**Feature Branch:** `feature/customer-records-management`
+## LINE OA Delivery Dashboard - Upload & Customer Management Features
 
 ---
 
-## 1. Executive Summary
+## **Document Information**
 
-### 1.1 Overview
-The Customer Records Management feature introduces a critical intermediate step between file upload and LINE message sending. This feature enables call center staff to review, validate, and edit customer delivery data before initiating LINE OA messaging, ensuring data accuracy and preventing customer communication errors.
+- **Version**: 1.0
+- **Date**: January 2024
+- **Product**: LINE OA Delivery Dashboard
+- **Team**: ThaiBev Customer Service Portal
+- **Stakeholders**: Call Center Operations, IT Development, UX Design
 
-### 1.2 Business Value
-- **Error Prevention**: Reduce delivery failures by 80% through pre-send validation
-- **Data Quality**: Ensure 100% of messages contain accurate customer information
-- **Operational Efficiency**: Save 2-3 hours daily on error correction and reprocessing
-- **Customer Satisfaction**: Eliminate complaints from incorrect delivery information
 
 ---
 
-## 2. User Journey & Flow
+## **Executive Summary**
 
-### 2.1 High-Level User Flow
-
-```
-Upload CSV/Excel → File Processing → Review Records → Data Valid? 
-                                                         ↓ No → Edit/Fix Records
-                                                         ↓ Yes
-                                     Preview Messages → Send to LINE → Track Status
-```
-
-### 2.2 Detailed User Journey
-
-#### Step 1: File Upload
-**Current State** ✅ (Already Implemented)
-- User uploads CSV/Excel file via drag-drop interface
-- System processes file and extracts delivery data
-- Upload status shown with success/error counts
-
-#### Step 2: Review Records (NEW)
-**Entry Point**: After successful upload or via new "Review Records" tab
-- System displays all uploaded records in paginated table
-- User sees validation status for each record
-- Statistics show ready/invalid/edited counts
-
-#### Step 3: Data Validation (NEW)
-**Automatic Process**:
-- LINE ID format validation (U + 32 chars)
-- Phone number validation (10 digits, starts with 0)
-- Delivery date validation (future dates only)
-- Required fields check
-
-#### Step 4: Edit Records (NEW)
-**User Actions**:
-- Click edit button on any record
-- Modal opens with editable form
-- Real-time validation on field changes
-- Save updates immediately
-
-#### Step 5: Bulk Operations (NEW)
-**User Actions**:
-- Select multiple records via checkboxes
-- Delete invalid/duplicate records
-- Bulk selection controls
-
-#### Step 6: Message Preview (NEW)
-**User Actions**:
-- Click preview button on any record
-- View exact LINE Flex message format
-- See customer data in context
-- Verify Thai language content
-
-#### Step 7: Send to LINE (NEW)
-**Final Step**:
-- Click "Send Messages" button
-- System processes validated records
-- Creates delivery entries
-- Initiates LINE messaging
-
-#### Step 8: Track Status
-**Current State** ✅ (Already Implemented)
-- View delivery confirmations
-- Track customer responses
-- Monitor delivery metrics
+This PRD outlines the requirements for upgrading the "Upload Deliveries" and "Customer Records Management" features in the LINE OA Delivery Dashboard. These features enable call center staff to efficiently process daily delivery data and manage customer communications through LINE Official Account.
 
 ---
 
-## 3. User Stories & Acceptance Criteria
+## **Problem Statement**
 
-### 3.1 Epic: Customer Records Review
+**Current Challenges:**
 
-```
-As a call center staff member
-I want to review all uploaded customer records before sending
-So that I can ensure data accuracy and prevent messaging errors
-```
+- Manual processing of daily delivery confirmations is time-consuming
+- Lack of data validation leads to failed message deliveries
+- No preview capability for LINE messages before sending
+- Limited bulk editing capabilities for customer records
+- Inconsistent message templates across different staff members
 
-### 3.2 Detailed User Stories
 
-| Story ID | User Story | Acceptance Criteria | Priority |
-|----------|------------|-------------------|----------|
-| CRM-001 | As a user, I want to see all uploaded records in a table | • Table displays customer name, LINE ID, order, date<br>• Records are paginated (50 per page)<br>• Page navigation works correctly | P0 |
-| CRM-002 | As a user, I want to edit individual records | • Edit button opens modal<br>• All fields are editable<br>• Changes save immediately<br>• Validation shows errors | P0 |
-| CRM-003 | As a user, I want to delete invalid records | • Delete button with confirmation<br>• Record removed from list<br>• Statistics update | P0 |
-| CRM-004 | As a user, I want to search for specific records | • Search by name, order, LINE ID<br>• Results update in real-time<br>• Clear search button | P1 |
-| CRM-005 | As a user, I want to filter by validation status | • Filter: All, Valid, Invalid, Edited<br>• Count badges on filters<br>• Pagination resets on filter | P1 |
-| CRM-006 | As a user, I want to preview LINE messages | • Preview shows Flex message<br>• Thai content displays correctly<br>• Quick reply buttons visible | P0 |
-| CRM-007 | As a user, I want to select multiple records | • Checkbox per record<br>• Select all checkbox<br>• Bulk delete option | P1 |
-| CRM-008 | As a user, I want to see validation errors clearly | • Invalid fields highlighted red<br>• Error message explains issue<br>• Icon indicates invalid records | P0 |
-| CRM-009 | As a user, I want to send validated records to LINE | • Send button enabled when all valid<br>• Progress indicator during send<br>• Success/failure notification | P0 |
-| CRM-010 | As a user, I want to see statistics | • Total, Valid, Invalid, Edited counts<br>• Real-time updates<br>• Visual indicators | P1 |
+**Business Impact:**
+
+- Reduced customer satisfaction due to delivery communication errors
+- Increased operational costs from manual data processing
+- Higher customer service workload from delivery-related inquiries
+
 
 ---
 
-## 4. Functional Specifications
+## **Objectives & Success Metrics**
 
-### 4.1 Data Model
+### **Primary Objectives**
 
-```typescript
-// New table: customers (staging area)
-interface Customer {
-  id: string                      // UUID
-  uploadSessionId: string         // Link to upload session
-  orderId: string                 // Order number
-  userId: string                  // LINE User ID
-  customerName: string            // Thai/English name
-  phone?: string                  // Thai phone number
-  address?: string                // Delivery address
-  deliveryDate: string            // YYYY-MM-DD format
-  notes?: string                  // Special instructions
-  validationStatus: 'valid' | 'invalid' | 'edited'
-  validationErrors?: string[]     // List of validation errors
-  createdAt: Date
-  updatedAt: Date
-}
+1. **Streamline Data Processing**: Reduce upload-to-send time by 70%
+2. **Improve Data Quality**: Achieve 95%+ successful message delivery rate
+3. **Enhance User Experience**: Reduce training time for new staff by 50%
+4. **Standardize Communications**: Ensure consistent message templates
 
-// Extend existing UploadSession
-interface UploadSession {
-  // ... existing fields ...
-  recordsReviewed: boolean        // Track if user reviewed records
-  recordsSent: boolean            // Track if records sent to LINE
-}
-```
 
-### 4.2 API Endpoints
+### **Success Metrics**
 
-| Method | Endpoint | Description | Request | Response |
-|--------|----------|-------------|---------|----------|
-| GET | `/api/customers` | Get paginated customers | `?page=1&limit=50&search=&status=` | `{data: Customer[], total: number, page: number}` |
-| GET | `/api/customers/:id` | Get single customer | - | `Customer` |
-| PUT | `/api/customers/:id` | Update customer | `Partial<Customer>` | `Customer` |
-| DELETE | `/api/customers/:id` | Delete customer | - | `204 No Content` |
-| POST | `/api/customers/bulk-delete` | Delete multiple | `{ids: string[]}` | `{deleted: number}` |
-| POST | `/api/customers/validate-all` | Validate all records | - | `{valid: number, invalid: number}` |
-| POST | `/api/customers/send-to-line` | Process and send | `{sessionId: string}` | `{sent: number, failed: number}` |
-| GET | `/api/customers/preview/:id` | Get message preview | - | `{flexMessage: object, customer: Customer}` |
+- **Operational Efficiency**: Time from CSV upload to message scheduling < 5 minutes
+- **Data Accuracy**: < 2% invalid records in processed files
+- **User Adoption**: 100% of call center staff using the system within 30 days
+- **Customer Satisfaction**: 90%+ positive response rate to delivery confirmations
 
-### 4.3 Validation Rules
-
-| Field | Validation | Error Message |
-|-------|------------|---------------|
-| userId | Starts with 'U', 33 chars total | "Invalid LINE ID format" |
-| phone | 10 digits, starts with 0 | "Invalid Thai phone number" |
-| deliveryDate | YYYY-MM-DD, >= today | "Date must be today or future" |
-| customerName | Required, 1-100 chars | "Customer name is required" |
-| orderId | Required, unique | "Order ID is required and must be unique" |
 
 ---
 
-## 5. UI/UX Specifications
+## **User Personas**
 
-### 5.1 Page Layout
+### **Primary Users**
 
-```
-┌─────────────────────────────────────────────────┐
-│  Review Customer Records          [Send to LINE] │
-├─────────────────────────────────────────────────┤
-│  ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐          │
-│  │ Total│ │Valid │ │Invalid│ │Edited│          │
-│  │  245 │ │  230 │ │   10  │ │   5  │          │
-│  └──────┘ └──────┘ └──────┘ └──────┘          │
-├─────────────────────────────────────────────────┤
-│  [🔍 Search...] [Status ▼] [Bulk Delete]        │
-├─────────────────────────────────────────────────┤
-│  ☐ | Name | LINE ID | Order | Date | Status |🔧│
-│  ☐ | สมชาย | U123... | ORD01 | 2024-01-20 | ✓ │
-│  ☐ | มาลี  | U456... | ORD02 | 2024-01-21 | ⚠ │
-├─────────────────────────────────────────────────┤
-│  < 1 2 3 4 5 > Showing 1-50 of 245             │
-└─────────────────────────────────────────────────┘
-```
+1. **Call Center Supervisor**
 
-### 5.2 Component Specifications
+1. Reviews and approves daily delivery batches
+2. Monitors system performance and error rates
+3. Manages team workflows
 
-#### Statistics Cards
-- **Design**: Consistent with existing stats cards
-- **Colors**: 
-  - Total: Gray
-  - Valid: Emerald green
-  - Invalid: Red
-  - Edited: Amber
-- **Updates**: Real-time on any change
 
-#### Customer Table
-- **Columns**: Checkbox, Name, LINE ID, Order, Date, Status, Actions
-- **Row Height**: 48px for touch-friendly interaction
-- **Hover State**: Light emerald background
-- **Selection**: Checkbox + row highlight
 
-#### Edit Dialog
-- **Width**: 600px max
-- **Fields**: All customer fields in form layout
-- **Validation**: Real-time with error messages below fields
-- **Actions**: Cancel, Save buttons
+2. **Call Center Agent**
 
-#### Message Preview Dialog
-- **Width**: 400px (LINE message width)
-- **Content**: Exact Flex message rendering
-- **Language**: Thai with proper fonts
-- **Actions**: Close button
+1. Uploads daily CSV files
+2. Reviews and edits customer records
+3. Handles customer inquiries about deliveries
 
-#### Pagination Controls
-- **Style**: Number buttons with prev/next arrows
-- **Current Page**: Emerald background
-- **Disabled State**: Gray out unavailable pages
 
-### 5.3 Interaction Patterns
 
-| Action | Trigger | Response |
-|--------|---------|----------|
-| Edit record | Click edit icon | Open modal with form |
-| Delete record | Click delete icon | Confirmation dialog → Remove |
-| Select record | Click checkbox | Highlight row, update count |
-| Search | Type in search box | Filter results after 300ms debounce |
-| Filter | Select status | Update table, reset to page 1 |
-| Preview | Click preview icon | Open message preview modal |
-| Bulk delete | Select records → Click delete | Confirmation → Remove all |
-| Send to LINE | Click send button | Validate all → Process → Navigate to status |
+3. **IT Administrator**
+
+1. Configures system settings
+2. Monitors technical performance
+3. Manages user access and permissions
+
+
+
+
 
 ---
 
-## 6. Technical Implementation
+## **Feature Requirements**
 
-### 6.1 Frontend Architecture
+## **Feature 1: Upload Deliveries**
 
-```typescript
-// Component Structure
-client/src/components/
-├── customers/
-│   ├── customer-records-table.tsx    // Main table component
-│   ├── customer-edit-dialog.tsx      // Edit modal
-│   ├── customer-row.tsx              // Table row component
-│   ├── message-preview-dialog.tsx    // Preview modal
-│   ├── bulk-actions-toolbar.tsx      // Bulk operations
-│   └── customer-stats-cards.tsx      // Statistics display
-├── ui/
-│   └── pagination.tsx                // Reusable pagination
-```
+### **1.1 File Upload Interface**
 
-### 6.2 State Management
+#### **Functional Requirements**
 
-```typescript
-// TanStack Query Keys
-const queryKeys = {
-  customers: (page: number, filters: FilterParams) => 
-    ['customers', page, filters],
-  customerStats: ['customer-stats'],
-  messagePreview: (id: string) => ['message-preview', id]
-}
+- **FR-1.1.1**: Support drag-and-drop file upload with visual feedback
+- **FR-1.1.2**: Accept CSV, XLS, XLSX file formats (max 5MB)
+- **FR-1.1.3**: Display upload progress with percentage indicator
+- **FR-1.1.4**: Provide sample CSV template download
+- **FR-1.1.5**: Support UTF-8 encoding with BOM for Thai characters
 
-// Mutations
-const mutations = {
-  updateCustomer: useMutation(),
-  deleteCustomer: useMutation(),
-  bulkDelete: useMutation(),
-  sendToLine: useMutation()
-}
+
+#### **Technical Requirements**
+
+- **TR-1.1.1**: Validate file type and size before processing
+- **TR-1.1.2**: Parse CSV with proper handling of quoted fields
+- **TR-1.1.3**: Handle special characters and Thai language content
+- **TR-1.1.4**: Implement chunked upload for large files
+
+
+#### **UI/UX Requirements**
+
+- **UX-1.1.1**: Clear visual distinction between drag states (idle, hover, active)
+- **UX-1.1.2**: Prominent file requirements display
+- **UX-1.1.3**: Error messages with specific guidance for resolution
+- **UX-1.1.4**: Success confirmation with record count
+
+
+### **1.2 Data Validation**
+
+#### **Functional Requirements**
+
+- **FR-1.2.1**: Validate required columns: `user_id`, `order_no`, `delivery_date`
+- **FR-1.2.2**: Check LINE User ID format (must start with 'U' + 15 characters)
+- **FR-1.2.3**: Validate date format (YYYY-MM-DD)
+- **FR-1.2.4**: Detect and flag duplicate order numbers
+- **FR-1.2.5**: Validate phone number format (Thai mobile numbers)
+
+
+#### **Business Rules**
+
+- **BR-1.2.1**: Delivery date must be within next 30 days
+- **BR-1.2.2**: Order numbers must follow format: ORD-YYYY-NNNN
+- **BR-1.2.3**: Customer names are optional but recommended
+- **BR-1.2.4**: Invalid records are flagged but don't block processing
+
+
+#### **Error Handling**
+
+- **EH-1.2.1**: Display validation errors with row numbers
+- **EH-1.2.2**: Allow partial processing with valid records
+- **EH-1.2.3**: Provide downloadable error report
+- **EH-1.2.4**: Suggest corrections for common errors
+
+
+### **1.3 Upload Status & Feedback**
+
+#### **Functional Requirements**
+
+- **FR-1.3.1**: Real-time upload progress indicator
+- **FR-1.3.2**: Success/error status for each uploaded file
+- **FR-1.3.3**: Record count summary (total, valid, invalid)
+- **FR-1.3.4**: Option to remove failed uploads and retry
+
+
+#### **UI Components**
+
+- **UC-1.3.1**: Progress bar with percentage
+- **UC-1.3.2**: Status badges (Success, Error, Processing)
+- **UC-1.3.3**: Expandable error details
+- **UC-1.3.4**: Remove/retry action buttons
+
+
+---
+
+## **Feature 2: Customer Records Management**
+
+### **2.1 Data Display & Navigation**
+
+#### **Functional Requirements**
+
+- **FR-2.1.1**: Display customer records in paginated table (50 records/page)
+- **FR-2.1.2**: Show customer name, LINE ID, order number, delivery date, status
+- **FR-2.1.3**: Implement search across all visible fields
+- **FR-2.1.4**: Filter by record status (Ready, Edited, Invalid)
+- **FR-2.1.5**: Sort by any column (ascending/descending)
+
+
+#### **Status Management**
+
+- **SM-2.1.1**: **Ready**: Original valid records from CSV
+- **SM-2.1.2**: **Edited**: Records modified by staff
+- **SM-2.1.3**: **Invalid**: Records with validation errors
+
+
+#### **Navigation Requirements**
+
+- **NR-2.1.1**: Page navigation with First/Previous/Next/Last buttons
+- **NR-2.1.2**: Page number display (e.g., "Page 1 of 5")
+- **NR-2.1.3**: Records count display (e.g., "Showing 1-50 of 127 records")
+
+
+### **2.2 Record Editing**
+
+#### **Functional Requirements**
+
+- **FR-2.2.1**: Inline editing for individual records
+- **FR-2.2.2**: Modal dialog for detailed editing
+- **FR-2.2.3**: Bulk selection with checkbox controls
+- **FR-2.2.4**: Bulk delete functionality
+- **FR-2.2.5**: Auto-save draft changes
+
+
+#### **Editable Fields**
+
+- **EF-2.2.1**: Customer name (Thai/English)
+- **EF-2.2.2**: Phone number (with format validation)
+- **EF-2.2.3**: LINE User ID (with format validation)
+- **EF-2.2.4**: Delivery date (date picker)
+- **EF-2.2.5**: Delivery address (multi-line text)
+- **EF-2.2.6**: Special notes/instructions
+
+
+#### **Validation Rules**
+
+- **VR-2.2.1**: Real-time validation on field changes
+- **VR-2.2.2**: Prevent saving invalid data
+- **VR-2.2.3**: Visual indicators for required fields
+- **VR-2.2.4**: Format hints and examples
+
+
+### **2.3 Message Preview**
+
+#### **Functional Requirements**
+
+- **FR-2.3.1**: Individual customer message preview
+- **FR-2.3.2**: Standard template preview in confirmation dialog
+- **FR-2.3.3**: Variable substitution preview (name, order, date)
+- **FR-2.3.4**: LINE interface mockup display
+
+
+#### **Template Variables**
+
+- **TV-2.3.1**: `[ชื่อลูกค้า]` - Customer name
+- **TV-2.3.2**: `[หมายเลขออเดอร์]` - Order number
+- **TV-2.3.3**: `[วันที่จัดส่ง]` - Delivery date (formatted)
+- **TV-2.3.4**: `[ที่อยู่จัดส่ง]` - Delivery address (optional)
+
+
+#### **LINE Message Format**
+
+```plaintext
+🚚 การยืนยันการจัดส่ง
+
+สวัสดีครับ คุณ[ชื่อลูกค้า]
+เราจะจัดส่งสินค้าให้คุณในวันที่ [วันที่จัดส่ง]
+
+หมายเลขออเดอร์: [หมายเลขออเดอร์]
+วันที่จัดส่ง: [วันที่จัดส่ง]
+
+กรุณายืนยันการจัดส่ง:
+[✅ ยืนยันการจัดส่ง] [📅 ขอเลื่อนการจัดส่ง]
 ```
 
-### 6.3 Backend Architecture
+### **2.4 Batch Operations**
 
-```typescript
-// Storage Interface Extension
-interface IStorage {
-  // ... existing methods ...
-  
-  // Customer methods
-  getCustomers(params: PaginationParams): Promise<PaginatedResult<Customer>>
-  getCustomer(id: string): Promise<Customer | undefined>
-  updateCustomer(id: string, data: Partial<Customer>): Promise<Customer>
-  deleteCustomer(id: string): Promise<boolean>
-  bulkDeleteCustomers(ids: string[]): Promise<number>
-  validateCustomers(sessionId: string): Promise<ValidationResult>
-  processCustomersToDeliveries(sessionId: string): Promise<ProcessResult>
-}
-```
+#### **Functional Requirements**
 
----
+- **FR-2.4.1**: Select all/none functionality
+- **FR-2.4.2**: Bulk status updates
+- **FR-2.4.3**: Bulk delete with confirmation
+- **FR-2.4.4**: Export selected records to CSV
 
-## 7. Integration Points
 
-### 7.1 Upload Flow Integration
-- After upload completes, show "Review Records" button
-- Auto-navigate to Review Records tab
-- Load customer records for the upload session
-- Display validation results
+#### **Send Confirmation Dialog**
 
-### 7.2 LINE Messaging Integration
-- Validate all records before enabling send
-- Convert validated customers to deliveries
-- Queue messages for LINE API
-- Track sending progress
-- Navigate to delivery status on completion
+- **SCD-2.4.1**: Summary statistics display
+- **SCD-2.4.2**: Sending options (immediate vs scheduled)
+- **SCD-2.4.3**: Include/exclude edited records option
+- **SCD-2.4.4**: Test mode for internal team
+- **SCD-2.4.5**: Message template preview
+- **SCD-2.4.6**: Final confirmation with record count
+
 
 ---
 
-## 8. Development Plan
+## **Design Requirements**
 
-### 8.1 Branch Strategy
+### **Visual Design**
 
-```bash
-main
-  └── feature/customer-records-management
-       ├── feat/crm-backend-schema
-       ├── feat/crm-api-endpoints
-       ├── feat/crm-table-component
-       ├── feat/crm-edit-dialog
-       ├── feat/crm-validation
-       ├── feat/crm-bulk-operations
-       ├── feat/crm-message-preview
-       └── feat/crm-line-integration
-```
+- **Brand Colors**: ThaiBev emerald green (`#059669`) and gold (`#f59e0b`)
+- **Typography**: Clean, readable fonts with Thai language support
+- **Icons**: Lucide React icon library for consistency
+- **Layout**: Responsive design for desktop and tablet use
 
-### 8.2 Development Phases
 
-| Phase | Duration | Tasks | Deliverable |
-|-------|----------|-------|-------------|
-| **Phase 1: Backend** | 2 days | • Create customers table<br>• Implement storage methods<br>• Build API endpoints<br>• Add validation logic | Working API with test data |
-| **Phase 2: Core UI** | 3 days | • Customer table component<br>• Pagination controls<br>• Search and filter<br>• Statistics cards | Basic review interface |
-| **Phase 3: CRUD Operations** | 2 days | • Edit dialog<br>• Delete functionality<br>• Form validation<br>• Real-time updates | Full CRUD functionality |
-| **Phase 4: Advanced Features** | 2 days | • Bulk operations<br>• Message preview<br>• Advanced validation<br>• Error handling | Complete feature set |
-| **Phase 5: Integration** | 1 day | • Upload flow connection<br>• LINE send functionality<br>• Navigation updates | Integrated system |
-| **Phase 6: Testing & Polish** | 2 days | • End-to-end testing<br>• Performance optimization<br>• UI polish<br>• Bug fixes | Production-ready feature |
+### **Accessibility**
 
-**Total Duration**: 12 days (2.5 weeks)
+- **WCAG 2.1 AA compliance**
+- **Keyboard navigation support**
+- **Screen reader compatibility**
+- **High contrast mode support**
+- **Thai language localization**
+
+
+### **Mobile Considerations**
+
+- **Responsive breakpoints**: Desktop (1024px+), Tablet (768px+)
+- **Touch-friendly interface elements**
+- **Optimized table display for smaller screens**
+
 
 ---
 
-## 9. Testing Strategy
+## ️ **Technical Specifications**
 
-### 9.1 Test Scenarios
+### **Frontend Technology Stack**
 
-| Category | Test Cases |
-|----------|------------|
-| **Data Loading** | • Load 0, 50, 100, 1000+ records<br>• Pagination navigation<br>• Page boundary conditions |
-| **Search** | • Search each field type<br>• Special characters<br>• No results handling |
-| **Validation** | • Each validation rule<br>• Multiple errors per record<br>• Edge cases |
-| **CRUD** | • Create, Read, Update, Delete<br>• Concurrent operations<br>• Error recovery |
-| **Bulk Operations** | • Select all/none<br>• Delete 1, 10, 100 records<br>• Performance at scale |
-| **Integration** | • Upload → Review flow<br>• Review → Send flow<br>• Error scenarios |
+- **Framework**: Next.js 14 with App Router
+- **UI Library**: shadcn/ui components
+- **Styling**: Tailwind CSS
+- **State Management**: React hooks and context
+- **File Handling**: react-dropzone library
 
-### 9.2 Performance Targets
 
-| Metric | Target | Max |
-|--------|--------|-----|
-| Initial page load | < 1s | 2s |
-| Pagination navigation | < 200ms | 500ms |
-| Search response | < 300ms | 500ms |
-| Edit dialog open | < 100ms | 300ms |
-| Save operation | < 500ms | 1s |
-| Bulk delete (100 records) | < 2s | 5s |
+### **Backend Requirements**
 
----
+- **File Processing**: Server Actions for upload handling
+- **Data Validation**: Zod schema validation
+- **Database**: PostgreSQL or similar for data persistence
+- **API Integration**: LINE Messaging API for message sending
 
-## 10. Success Metrics
 
-### 10.1 Technical Metrics
-- Page load time < 2 seconds for 1000 records
-- Zero data loss during operations
-- 100% validation accuracy
+### **Performance Requirements**
 
-### 10.2 Business Metrics
-- 80% reduction in delivery errors
-- 100% staff adoption within 1 week
-- 50% reduction in customer complaints
+- **File Upload**: Support up to 5MB files
+- **Processing Speed**: Handle 1000+ records in < 30 seconds
+- **Page Load**: Initial load < 3 seconds
+- **Search Response**: < 500ms for filtered results
 
-### 10.3 User Experience Metrics
-- Task completion time < 10 minutes for 100 records
-- Error rate < 1% during operations
-- User satisfaction score > 4.5/5
+
+### **Security Requirements**
+
+- **File Validation**: Strict file type and size checking
+- **Data Sanitization**: XSS and injection prevention
+- **Access Control**: Role-based permissions
+- **Audit Logging**: Track all data modifications
+
 
 ---
 
-## 11. Rollout Plan
+## **Testing Requirements**
 
-### 11.1 Deployment Strategy
-1. **Development Environment**: Complete feature development
-2. **Staging Environment**: UAT with sample data
-3. **Production Pilot**: 10% of users for 3 days
-4. **Full Rollout**: 100% deployment
+### **Unit Testing**
 
-### 11.2 Training Plan
-- Create user guide documentation
-- Record video walkthrough
-- Conduct live training session
-- Provide quick reference card
+- **File upload validation functions**
+- **Data parsing and validation logic**
+- **UI component behavior**
+- **Form validation rules**
 
----
 
-## 12. Risk Mitigation
+### **Integration Testing**
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| Large dataset performance | High | Implement virtual scrolling, optimize queries |
-| Data loss during editing | High | Auto-save, confirmation dialogs |
-| User adoption resistance | Medium | Clear benefits communication, training |
-| LINE API rate limits | Medium | Batch processing, queue management |
+- **End-to-end upload workflow**
+- **Database operations**
+- **LINE API integration**
+- **Error handling scenarios**
 
----
 
-## 13. Dependencies
+### **User Acceptance Testing**
 
-### 13.1 Technical Dependencies
-- Existing upload functionality must be working
-- Database must support new customers table
-- LINE API credentials and templates must be configured
+- **Upload various file formats and sizes**
+- **Edit customer records with different data types**
+- **Test message preview functionality**
+- **Verify bulk operations work correctly**
 
-### 13.2 Business Dependencies
-- Approval of validation rules from operations team
-- LINE message templates approved by marketing
-- Training materials prepared for staff
+
+### **Performance Testing**
+
+- **Large file upload (5MB)**
+- **High record count processing (1000+ records)**
+- **Concurrent user scenarios**
+- **Memory usage optimization**
+
 
 ---
 
-## 14. Open Questions
+## **Analytics & Monitoring**
 
-1. Should we allow editing of Order ID after upload?
-2. What is the maximum number of records we expect in a single upload?
-3. Should we implement an undo feature for bulk deletions?
-4. Do we need audit logging for all edits?
-5. Should invalid records block sending or just show warnings?
+### **Key Metrics to Track**
 
----
+- **Upload success/failure rates**
+- **Processing time per file size**
+- **User interaction patterns**
+- **Error frequency and types**
+- **Message delivery success rates**
 
-## 15. Appendix
 
-### A. Database Schema
+### **Monitoring Requirements**
 
-```sql
-CREATE TABLE customers (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  upload_session_id UUID REFERENCES upload_sessions(id),
-  order_id VARCHAR(255) UNIQUE NOT NULL,
-  user_id VARCHAR(33) NOT NULL,
-  customer_name VARCHAR(255) NOT NULL,
-  phone VARCHAR(10),
-  address TEXT,
-  delivery_date DATE NOT NULL,
-  notes TEXT,
-  validation_status VARCHAR(20) DEFAULT 'valid',
-  validation_errors JSONB,
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
-);
+- **Real-time error tracking**
+- **Performance monitoring**
+- **User session analytics**
+- **System health dashboards**
 
-CREATE INDEX idx_customers_session ON customers(upload_session_id);
-CREATE INDEX idx_customers_status ON customers(validation_status);
-CREATE INDEX idx_customers_search ON customers(customer_name, order_id, user_id);
-```
-
-### B. Sample API Responses
-
-```json
-// GET /api/customers?page=1&limit=50
-{
-  "data": [
-    {
-      "id": "123e4567-e89b-12d3-a456-426614174000",
-      "uploadSessionId": "session-123",
-      "orderId": "ORD-2024-001",
-      "userId": "U1234567890abcdefghijklmnopqrstu",
-      "customerName": "สมชาย ใจดี",
-      "phone": "0812345678",
-      "address": "123 ถ.สุขุมวิท กทม 10110",
-      "deliveryDate": "2024-01-25",
-      "notes": "โทรก่อนส่ง",
-      "validationStatus": "valid",
-      "validationErrors": [],
-      "createdAt": "2024-01-20T10:00:00Z",
-      "updatedAt": "2024-01-20T10:00:00Z"
-    }
-  ],
-  "total": 245,
-  "page": 1,
-  "totalPages": 5
-}
-```
-
-### C. LINE Flex Message Template
-
-```json
-{
-  "type": "flex",
-  "altText": "ยืนยันการจัดส่ง",
-  "contents": {
-    "type": "bubble",
-    "header": {
-      "type": "box",
-      "layout": "vertical",
-      "contents": [
-        {
-          "type": "text",
-          "text": "ยืนยันการจัดส่ง",
-          "size": "xl",
-          "weight": "bold"
-        }
-      ]
-    },
-    "body": {
-      "type": "box",
-      "layout": "vertical",
-      "contents": [
-        {
-          "type": "text",
-          "text": "คุณ {customerName}"
-        },
-        {
-          "type": "text",
-          "text": "Order: {orderId}"
-        },
-        {
-          "type": "text",
-          "text": "วันจัดส่ง: {deliveryDate}"
-        }
-      ]
-    },
-    "footer": {
-      "type": "box",
-      "layout": "horizontal",
-      "contents": [
-        {
-          "type": "button",
-          "action": {
-            "type": "postback",
-            "label": "ยืนยัน",
-            "data": "action=confirm&orderId={orderId}"
-          }
-        },
-        {
-          "type": "button",
-          "action": {
-            "type": "postback",
-            "label": "เลื่อน",
-            "data": "action=reschedule&orderId={orderId}"
-          }
-        }
-      ]
-    }
-  }
-}
-```
 
 ---
 
-**Document Version History**
+## **Implementation Phases**
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | 2025-01-06 | Product Team | Initial PRD |
-| 2.0 | 2025-01-06 | Development Team | Adapted for Replit implementation |
+### **Phase 1: Core Upload Functionality (2 weeks)**
+
+- File upload interface
+- Basic validation
+- Progress indicators
+- Error handling
+
+
+### **Phase 2: Customer Records Management (3 weeks)**
+
+- Data table with pagination
+- Search and filtering
+- Individual record editing
+- Status management
+
+
+### **Phase 3: Advanced Features (2 weeks)**
+
+- Bulk operations
+- Message preview
+- Send confirmation dialog
+- Template management
+
+
+### **Phase 4: Polish & Testing (1 week)**
+
+- UI/UX refinements
+- Performance optimization
+- Comprehensive testing
+- Documentation
+
 
 ---
 
-**Approval Status**: Pending
+## **Acceptance Criteria**
 
-**Next Steps**:
-1. Review and approve PRD
-2. Create feature branch
-3. Begin Phase 1 development
+### **Upload Deliveries**
+
+- ✅ Users can upload CSV/Excel files via drag-and-drop
+- ✅ System validates data and shows clear error messages
+- ✅ Upload progress is visible with percentage completion
+- ✅ Sample template is downloadable
+- ✅ Thai characters are properly handled
+
+
+### **Customer Records**
+
+- ✅ Records display in paginated table with 50 items per page
+- ✅ Search works across all visible fields
+- ✅ Individual records can be edited with validation
+- ✅ Bulk selection and operations function correctly
+- ✅ Message preview shows actual LINE interface
+- ✅ Send confirmation dialog displays all required information
+
+
+---
+
+## **Future Enhancements**
+
+### **Potential Features**
+
+- **Advanced Templates**: Multiple message templates for different scenarios
+- **Scheduling Options**: Different send times for different customer segments
+- **Analytics Dashboard**: Detailed reporting on delivery confirmations
+- **API Integration**: Direct integration with delivery management systems
+- **Mobile App**: Native mobile app for field staff
+
+
+---
+
+## **Support & Documentation**
+
+### **User Documentation**
+
+- **User manual** with step-by-step guides
+- **Video tutorials** for common workflows
+- **FAQ section** for troubleshooting
+- **Best practices guide** for data preparation
+
+
+### **Technical Documentation**
+
+- **API documentation** for integrations
+- **Database schema** documentation
+- **Deployment guide** for IT teams
+- **Troubleshooting guide** for support staff
+
+
+---
+
+**Document Prepared By**: Product Team  
+**Review Required By**: Design Team, Development Team, QA Team  
+**Approval Required By**: Product Manager, Engineering Manager
+
+This PRD should give your design and development team everything they need to upgrade the Upload Deliveries and Customer Records features effectively! 🚀
