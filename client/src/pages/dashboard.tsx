@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Box, FolderSync, Upload, Truck, BarChart3 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Box, FolderSync, Upload, Truck, BarChart3, Users, MessageCircle, ArrowRight } from "lucide-react";
 import { StatsCards } from "@/components/stats-cards";
 import { UploadZone } from "@/components/upload-zone";
 import { DeliveryTable } from "@/components/delivery-table";
@@ -61,6 +63,65 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Statistics Cards */}
         <StatsCards stats={stats} isLoading={statsLoading} />
+
+        {/* Quick Navigation */}
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Link href="/customers">
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200 group">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center justify-between text-lg">
+                    <div className="flex items-center">
+                      <Users className="w-5 h-5 mr-2 text-emerald-600" />
+                      Customer Records
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-emerald-600 transition-colors" />
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600">
+                    Manage customer delivery records and send LINE messages for delivery confirmations.
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200 group">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center justify-between text-lg">
+                  <div className="flex items-center">
+                    <MessageCircle className="w-5 h-5 mr-2 text-blue-600" />
+                    LINE Messaging
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors" />
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600">
+                  Send bulk LINE messages for delivery confirmations and track customer responses.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200 group">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center justify-between text-lg">
+                  <div className="flex items-center">
+                    <BarChart3 className="w-5 h-5 mr-2 text-yellow-600" />
+                    Analytics
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-yellow-600 transition-colors" />
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600">
+                  View detailed analytics and reports on delivery performance and customer responses.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
 
         {/* Main Content Tabs */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">

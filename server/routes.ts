@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { insertDeliverySchema, insertUploadSessionSchema } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
+import customerRoutes from "./routes/customers";
 
 // Configure multer for file uploads
 const upload = multer({
@@ -189,6 +190,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to export data" });
     }
   });
+
+  // Customer Records routes
+  app.use("/api/customer-records", customerRoutes);
 
   const httpServer = createServer(app);
   return httpServer;
