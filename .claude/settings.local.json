@@ -6,7 +6,8 @@
       "Bash(mkdir:*)",
       "Bash(find:*)",
       "Bash(git branch:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": []
   }
