@@ -39,18 +39,36 @@ Currently implements in-memory storage with a well-defined interface for easy mi
 
 The schema includes delivery tracking (order ID, customer info, status, response times), upload session management (file processing, success/error counts), customer records management (Thai names, LINE user IDs, delivery addresses, phone numbers), and message template storage for LINE OA integration.
 
-## Recent Changes (January 6, 2025)
+## Recent Changes
 
-### Mockup Data Cleanup
-- **Removed Sample Data**: Eliminated all hardcoded sample data initialization from MemStorage
+### Customer Records Table Restructure (August 7, 2025)
+- **Column Structure Updated**: Streamlined customer records table to display exactly 6 columns:
+  1. Customer (renamed from Customer Name)
+  2. LINE ID (renamed from LINE User ID)
+  3. Order No (renamed from Order Number)
+  4. Delivery Date
+  5. Status
+  6. Actions
+- **Actions Column Implementation**: Added comprehensive action buttons for each record:
+  - **Preview** (Eye icon): View LINE message preview for specific customer
+  - **Edit** (Edit icon): Modify customer record details
+  - **Delete** (Trash icon): Remove customer record from system
+- **UI Consistency**: Updated loading skeletons and empty states to match new 6-column structure
+- **Functional Integration**: All action buttons properly integrated with existing functionality (preview dialog, edit forms, delete operations)
+
+### Upload Zone Improvements (August 7, 2025)
+- **Button Alignment**: Moved "Load Sample Data" and "Download Sample CSV" buttons to left-aligned layout
+- **Helper Text**: Updated helper text alignment to match button positioning
+- **Development Features**: Maintained sample data loading functionality for testing and training purposes
+
+### Data Management (January 6, 2025)
+- **Mockup Data Cleanup**: Eliminated all hardcoded sample data initialization from MemStorage
   - Removed `initializeSampleData()` - 4 Thai delivery records
   - Removed `initializeCustomerSampleData()` - 3 customer records with Thai addresses
   - Removed `initializeMessageTemplates()` - empty sample method
 - **Cleaned File Processing**: Updated `processFileAsync()` to remove hardcoded simulation values
-  - Changed status from "completed" to "pending" to indicate real implementation needed
-  - Removed fake success/error counts and mock error messages
-- **Preserved Essential Features**: Kept `initializeDefaultMessageTemplate()` as it provides required LINE messaging functionality
-- **Production Ready**: Application now starts with clean, empty data stores ready for real data testing
+- **Preserved Essential Features**: Kept `initializeDefaultMessageTemplate()` and sample data API endpoint
+- **Production Ready**: Application starts with clean data stores but maintains testing capabilities
 
 ## Authentication and Authorization
 Currently no authentication is implemented - the application operates as an internal tool. The architecture supports adding authentication layers without significant refactoring.
