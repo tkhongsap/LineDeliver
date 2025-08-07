@@ -124,7 +124,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">LINE OA Delivery Dashboard</h1>
-                <p className="text-sm text-emerald-600 font-medium">ThaiBev Customer Service Portal</p>
+                <p className="text-sm text-emerald-600 font-medium">Customer Service Portal</p>
               </div>
             </div>
             <div className="flex items-center space-x-2 text-sm text-gray-500">
@@ -340,9 +340,6 @@ export default function Dashboard() {
             isOpen={isMessageDialogOpen}
             onClose={() => setIsMessageDialogOpen(false)}
             customer={messageRecord}
-            onSendMessage={(template, customer) => {
-              console.log("Sending message:", template, customer);
-            }}
           />
         )}
 
@@ -355,11 +352,6 @@ export default function Dashboard() {
               setPreviewCustomer(null);
             }}
             customer={previewCustomer}
-            onSendMessage={(template, customer) => {
-              console.log("Sending message from preview:", template, customer);
-              setIsPreviewDialogOpen(false);
-              setPreviewCustomer(null);
-            }}
           />
         )}
 

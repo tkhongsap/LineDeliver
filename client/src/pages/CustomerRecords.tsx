@@ -185,10 +185,6 @@ export default function CustomerRecords() {
           isOpen={isMessageDialogOpen}
           onClose={() => setIsMessageDialogOpen(false)}
           customer={messageRecord}
-          onSendMessage={(template, customer) => {
-            // TODO: Implement actual LINE messaging
-            console.log("Sending message:", template, customer);
-          }}
         />
       )}
 
@@ -201,12 +197,6 @@ export default function CustomerRecords() {
             setPreviewCustomer(null);
           }}
           customer={previewCustomer}
-          onSendMessage={(template, customer) => {
-            // TODO: Implement actual LINE messaging
-            console.log("Sending message:", template, customer);
-            setIsPreviewDialogOpen(false);
-            setPreviewCustomer(null);
-          }}
         />
       )}
 
