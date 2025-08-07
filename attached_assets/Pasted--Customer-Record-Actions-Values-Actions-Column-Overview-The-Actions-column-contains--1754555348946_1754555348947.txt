@@ -1,0 +1,217 @@
+# Customer Record Actions Values
+
+## **Actions Column Overview**
+
+The "Actions" column contains **3 action buttons** for each customer record:
+
+## **Action Button Types**
+
+### **1. 👁️ Preview (Eye Icon)**
+
+- **Value/Function**: `setPreviewCustomer(customer)`
+- **Purpose**: View LINE message preview for this specific customer
+- **What it does**:
+
+- Opens `MessagePreviewDialog` component
+- Shows personalized LINE message with customer's actual data
+- Displays how the message will look in LINE app
+- Shows customer information and message template
+
+
+
+
+
+### **2. ✏️ Edit (Edit Icon)**
+
+- **Value/Function**: `handleEditCustomer(customer)`
+- **Purpose**: Edit customer record details
+- **What it does**:
+
+- Opens edit dialog modal
+- Allows modification of customer fields
+- Changes status to "edited" when saved
+- Validates data before saving
+
+
+
+
+
+### **3. 🗑️ Delete (Trash Icon)**
+
+- **Value/Function**: `handleDeleteOne(customer.id)`
+- **Purpose**: Remove customer record from the list
+- **What it does**:
+
+- Removes record from the table
+- Updates statistics counters
+- Cannot be undone (no confirmation dialog currently)
+
+
+
+
+
+## **Actions in Code**
+
+### **Button Implementation:**
+
+```typescript
+<div className="flex space-x-1">
+  {/* Preview Action */}
+  <Button
+    variant="ghost"
+    size="sm"
+    onClick={() => setPreviewCustomer(customer)}
+    className="h-8 w-8 p-0"
+  >
+    <Eye className="w-4 h-4" />
+  </Button>
+
+  {/* Edit Action */}
+  <Button
+    variant="ghost"
+    size="sm"
+    onClick={() => handleEditCustomer(customer)}
+    className="h-8 w-8 p-0"
+  >
+    <Edit className="w-4 h-4" />
+  </Button>
+
+  {/* Delete Action */}
+  <Button
+    variant="ghost"
+    size="sm"
+    onClick={() => handleDeleteOne(customer.id)}
+    className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+  >
+    <Trash2 className="w-4 h-4" />
+  </Button>
+</div>
+```
+
+## **Action Behaviors**
+
+### **Preview Action Details:**
+
+- **Trigger**: Click eye icon
+- **Opens**: Modal dialog with LINE message preview
+- **Shows**:
+
+- Customer information summary
+- Actual LINE Flex message layout
+- Personalized content with customer's data
+- Quick reply buttons (disabled for preview)
+- Message details and expected responses
+
+
+
+
+
+### **Edit Action Details:**
+
+- **Trigger**: Click edit icon
+- **Opens**: Edit dialog modal
+- **Editable Fields**:
+
+- Customer name
+- Phone number
+- LINE User ID
+- Delivery date (date picker)
+- Order number
+- Delivery address (textarea)
+- Special notes (textarea)
+
+
+
+- **Validation**: Real-time validation on field changes
+- **Save Effect**: Changes status to "edited"
+
+
+### **Delete Action Details:**
+
+- **Trigger**: Click trash icon
+- **Effect**: Immediate removal from table
+- **Updates**:
+
+- Removes from customer list
+- Updates statistics counters
+- Removes from any bulk selections
+
+
+
+- **Visual**: Red color to indicate destructive action
+
+
+## **Visual Design**
+
+### **Button Styling:**
+
+- **Size**: Small (8x8 with 4x4 icons)
+- **Style**: Ghost buttons (transparent background)
+- **Hover**: Light background color on hover
+- **Colors**:
+
+- Preview: Default gray
+- Edit: Default gray
+- Delete: Red text with red hover background
+
+
+
+
+
+### **Icon Library:**
+
+- **Preview**: `Eye` from Lucide React
+- **Edit**: `Edit` from Lucide React
+- **Delete**: `Trash2` from Lucide React
+
+
+## **Action Availability**
+
+### **All Actions Available For:**
+
+- ✅ Ready status records
+- ✅ Edited status records
+- ✅ Invalid status records
+
+
+### **No Conditional Logic:**
+
+- All 3 actions are always available
+- No status-based restrictions
+- No permission-based hiding (currently)
+
+
+## **Action Usage Patterns**
+
+### **Common Workflows:**
+
+1. **Preview → Edit**: View message, then make corrections
+2. **Edit → Preview**: Make changes, then verify message
+3. **Delete**: Remove incorrect/duplicate records
+4. **Bulk Select → Delete**: Remove multiple records at once
+
+
+## **Future Enhancement Possibilities**
+
+### **Potential Additional Actions:**
+
+- **Duplicate**: Copy record to create similar entry
+- **History**: View edit history for the record
+- **Notes**: Add internal notes not visible to customer
+- **Priority**: Mark high-priority deliveries
+
+
+### **Conditional Actions:**
+
+- **Restore**: For deleted records (if soft delete implemented)
+- **Validate**: Re-run validation on invalid records
+- **Send Individual**: Send message to single customer
+
+
+## **Tell Your Team:**
+
+> *"Actions column has 3 buttons: Eye (preview LINE message), Edit (modify customer data), and Trash (delete record). All actions are available for all records regardless of status. Preview shows the actual LINE message, Edit opens a form dialog, and Delete removes the record immediately."*
+
+
+
+The Actions provide essential record-level operations for customer data management! 🚀

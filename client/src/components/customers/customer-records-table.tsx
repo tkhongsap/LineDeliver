@@ -248,15 +248,14 @@ export function CustomerRecordsTable({
                 </TableHead>
                 <TableHead className="cursor-pointer" onClick={() => handleSort("customerName")}>
                   <div className="flex items-center">
-                    Customer Name
+                    Customer
                     <ArrowUpDown className="w-4 h-4 ml-1" />
                   </div>
                 </TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>LINE User ID</TableHead>
+                <TableHead>LINE ID</TableHead>
                 <TableHead className="cursor-pointer" onClick={() => handleSort("orderNumber")}>
                   <div className="flex items-center">
-                    Order Number
+                    Order No
                     <ArrowUpDown className="w-4 h-4 ml-1" />
                   </div>
                 </TableHead>
@@ -272,12 +271,6 @@ export function CustomerRecordsTable({
                     <ArrowUpDown className="w-4 h-4 ml-1" />
                   </div>
                 </TableHead>
-                <TableHead className="cursor-pointer" onClick={() => handleSort("lastModified")}>
-                  <div className="flex items-center">
-                    Last Modified
-                    <ArrowUpDown className="w-4 h-4 ml-1" />
-                  </div>
-                </TableHead>
                 <TableHead className="w-16">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -288,18 +281,16 @@ export function CustomerRecordsTable({
                   <TableRow key={i}>
                     <TableCell><Skeleton className="h-4 w-4" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-48" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-16" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-16" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-8" /></TableCell>
                   </TableRow>
                 ))
               ) : records.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8 text-gray-500">
+                  <TableCell colSpan={7} className="text-center py-8 text-gray-500">
                     No customer records found.
                   </TableCell>
                 </TableRow>
@@ -311,6 +302,15 @@ export function CustomerRecordsTable({
                     isSelected={selectedRecords.has(record.id)}
                     onSelect={handleSelectRecord}
                     onEdit={(record) => onEditRecord?.(record)}
+                    onPreview={(record) => onViewRecord?.(record)}
+                    onDelete={(recordId) => {
+                      deleteRecordMutation.mutate(recordId);
+                      setSelectedRecords(prev => {
+                        const newSelected = new Set(prev);
+                        newSelected.delete(recordId);
+                        return newSelected;
+                      });
+                    }}
                   />
                 ))
               )}
