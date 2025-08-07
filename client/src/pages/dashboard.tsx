@@ -29,6 +29,8 @@ export default function Dashboard() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [messageRecord, setMessageRecord] = useState<CustomerRecord | null>(null);
   const [isMessageDialogOpen, setIsMessageDialogOpen] = useState(false);
+  const [previewCustomer, setPreviewCustomer] = useState<CustomerRecord | null>(null);
+  const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
   const [bulkMessageRecords, setBulkMessageRecords] = useState<CustomerRecord[]>([]);
   const [isBulkMessageDialogOpen, setIsBulkMessageDialogOpen] = useState(false);
 
@@ -71,8 +73,9 @@ export default function Dashboard() {
   };
 
   const handleViewRecord = (record: CustomerRecord) => {
-    setSelectedRecord(record);
     console.log("View record:", record);
+    setPreviewCustomer(record);
+    setIsPreviewDialogOpen(true);
   };
 
   const handleSendMessage = (record: CustomerRecord) => {
@@ -339,6 +342,23 @@ export default function Dashboard() {
             customer={messageRecord}
             onSendMessage={(template, customer) => {
               console.log("Sending message:", template, customer);
+            }}
+          />
+        )}
+
+        {/* Preview Dialog for Eye Icon */}
+        {previewCustomer && (
+          <MessagePreviewDialog
+            isOpen={isPreviewDialogOpen}
+            onClose={() => {
+              setIsPreviewDialogOpen(false);
+              setPreviewCustomer(null);
+            }}
+            customer={previewCustomer}
+            onSendMessage={(template, customer) => {
+              console.log("Sending message from preview:", template, customer);
+              setIsPreviewDialogOpen(false);
+              setPreviewCustomer(null);
             }}
           />
         )}
