@@ -4,7 +4,9 @@
       "WebFetch(domain:github.com)",
       "Bash(git subtree add:*)",
       "Bash(mkdir:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(git branch:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }

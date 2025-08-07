@@ -19,6 +19,8 @@ export default function CustomerRecords() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [messageRecord, setMessageRecord] = useState<CustomerRecord | null>(null);
   const [isMessageDialogOpen, setIsMessageDialogOpen] = useState(false);
+  const [previewCustomer, setPreviewCustomer] = useState<CustomerRecord | null>(null);
+  const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
   const [bulkMessageRecords, setBulkMessageRecords] = useState<CustomerRecord[]>([]);
   const [isBulkMessageDialogOpen, setIsBulkMessageDialogOpen] = useState(false);
 
@@ -46,9 +48,8 @@ export default function CustomerRecords() {
   };
 
   const handleViewRecord = (record: CustomerRecord) => {
-    setSelectedRecord(record);
-    // Could open a read-only view dialog here
-    console.log("View record:", record);
+    setPreviewCustomer(record);
+    setIsPreviewDialogOpen(true);
   };
 
   const handleSendMessage = (record: CustomerRecord) => {
@@ -187,6 +188,24 @@ export default function CustomerRecords() {
           onSendMessage={(template, customer) => {
             // TODO: Implement actual LINE messaging
             console.log("Sending message:", template, customer);
+          }}
+        />
+      )}
+
+      {/* Preview Dialog for Eye Icon */}
+      {previewCustomer && (
+        <MessagePreviewDialog
+          isOpen={isPreviewDialogOpen}
+          onClose={() => {
+            setIsPreviewDialogOpen(false);
+            setPreviewCustomer(null);
+          }}
+          customer={previewCustomer}
+          onSendMessage={(template, customer) => {
+            // TODO: Implement actual LINE messaging
+            console.log("Sending message:", template, customer);
+            setIsPreviewDialogOpen(false);
+            setPreviewCustomer(null);
           }}
         />
       )}

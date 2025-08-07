@@ -11,7 +11,7 @@ import { useUpdateCustomerRecord } from "@/hooks/use-customer-records";
 import { updateCustomerRecordSchema } from "@shared/customer-schema";
 import { useDebouncedCallback } from "@/hooks/use-debounce";
 import type { CustomerRecord, UpdateCustomerRecord } from "@shared/customer-schema";
-import { Edit2, Save, X, ExternalLink, Clock } from "lucide-react";
+import { Edit2, Save, X, ExternalLink, Clock, Eye, Edit, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface CustomerRowProps {
@@ -19,9 +19,11 @@ interface CustomerRowProps {
   isSelected: boolean;
   onSelect: (recordId: string, selected: boolean) => void;
   onEdit: (record: CustomerRecord) => void;
+  onPreview?: (record: CustomerRecord) => void;
+  onDelete?: (recordId: string) => void;
 }
 
-export function CustomerRow({ record, isSelected, onSelect, onEdit }: CustomerRowProps) {
+export function CustomerRow({ record, isSelected, onSelect, onEdit, onPreview, onDelete }: CustomerRowProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isAutoSaving, setIsAutoSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -174,18 +176,7 @@ export function CustomerRow({ record, isSelected, onSelect, onEdit }: CustomerRo
             </span>
           )}
         </TableCell>
-        <TableCell>
-          <Input
-            {...form.register("phone")}
-            className="h-8 text-sm"
-            placeholder="+66-xx-xxx-xxxx"
-          />
-          {form.formState.errors.phone && (
-            <span className="text-xs text-red-500">
-              {form.formState.errors.phone.message}
-            </span>
-          )}
-        </TableCell>
+
         <TableCell>
           <Input
             {...form.register("lineUserId")}
@@ -212,28 +203,19 @@ export function CustomerRow({ record, isSelected, onSelect, onEdit }: CustomerRo
             className="h-8 text-sm"
           />
         </TableCell>
+
         <TableCell>
-          <Input
-            {...form.register("deliveryAddress")}
-            className="h-8 text-sm"
-            placeholder="Delivery address"
-          />
-        </TableCell>
-        <TableCell>
-          <div className="flex items-center space-x-2">
-            <Badge variant="secondary">editing</Badge>
-            {isAutoSaving && (
-              <div className="flex items-center text-xs text-gray-500">
-                <Clock className="w-3 h-3 mr-1 animate-spin" />
-                Auto-saving...
-              </div>
-            )}
-            {lastSaved && !isAutoSaving && (
-              <div className="text-xs text-green-600">
-                Saved {lastSaved.toLocaleTimeString()}
-              </div>
-            )}
-          </div>
+          <Badge 
+            variant={getStatusBadgeVariant(record.status)}
+            className={cn("capitalize", getStatusColor(record.status))}
+          >
+            {isAutoSaving ? "saving..." : record.status}
+          </Badge>
+          {lastSaved && !isAutoSaving && (
+            <div className="text-xs text-green-600 mt-1">
+              Saved {lastSaved.toLocaleTimeString()}
+            </div>
+          )}
         </TableCell>
         <TableCell>
           <div className="flex items-center space-x-1">
@@ -274,7 +256,6 @@ export function CustomerRow({ record, isSelected, onSelect, onEdit }: CustomerRo
           <span>{record.customerName}</span>
         </div>
       </TableCell>
-      <TableCell>{record.phone}</TableCell>
       <TableCell>
         <span className="font-mono text-sm">{record.lineUserId}</span>
       </TableCell>
@@ -282,11 +263,6 @@ export function CustomerRow({ record, isSelected, onSelect, onEdit }: CustomerRo
         <span className="font-mono text-sm">{record.orderNumber}</span>
       </TableCell>
       <TableCell>{record.deliveryDate}</TableCell>
-      <TableCell>
-        <div className="max-w-[200px] truncate" title={record.deliveryAddress || ""}>
-          {record.deliveryAddress}
-        </div>
-      </TableCell>
       <TableCell>
         <Badge 
           variant={getStatusBadgeVariant(record.status)}
@@ -296,24 +272,33 @@ export function CustomerRow({ record, isSelected, onSelect, onEdit }: CustomerRo
         </Badge>
       </TableCell>
       <TableCell>
-        <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center space-x-1">
           <Button
             size="sm"
             variant="ghost"
-            onClick={handleEditStart}
-            className="h-7 px-2"
-            title="Quick edit"
+            onClick={() => onPreview?.(record)}
+            className="h-8 w-8 p-0"
+            title="Preview LINE message"
           >
-            <Edit2 className="w-3 h-3" />
+            <Eye className="w-4 h-4" />
           </Button>
           <Button
             size="sm"
             variant="ghost"
-            onClick={handleDetailedEdit}
-            className="h-7 px-2"
-            title="Detailed edit"
+            onClick={() => onEdit(record)}
+            className="h-8 w-8 p-0"
+            title="Edit customer record"
           >
-            <ExternalLink className="w-3 h-3" />
+            <Edit className="w-4 h-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => onDelete?.(record.id)}
+            className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+            title="Delete customer record"
+          >
+            <Trash2 className="w-4 h-4" />
           </Button>
         </div>
       </TableCell>
