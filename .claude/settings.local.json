@@ -5,7 +5,8 @@
       "Bash(git subtree add:*)",
       "Bash(mkdir:*)",
       "Bash(find:*)",
-      "Bash(git branch:*)"
+      "Bash(git branch:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }
