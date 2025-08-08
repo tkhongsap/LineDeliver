@@ -421,28 +421,76 @@ U3234567890abcdef1234567890abcdef,Hello Customer 3`}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-600">
-                  Click "Get Followers" to retrieve all User IDs who have added your bot as a friend.
-                  Your personal User ID will be in this list.
-                </p>
-                <Button
-                  onClick={getFollowers}
-                  disabled={isLoadingFollowers || !configStatus?.isConfigured}
-                  variant="outline"
-                >
-                  {isLoadingFollowers ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Loading...
-                    </>
-                  ) : (
-                    <>
-                      <Users className="w-4 h-4 mr-2" />
-                      Get Followers
-                    </>
-                  )}
-                </Button>
+              <Alert className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>API Limitation Notice</AlertTitle>
+                <AlertDescription>
+                  The LINE follower API requires special permissions and is often restricted. 
+                  Please use the alternative methods below to get your User ID.
+                </AlertDescription>
+              </Alert>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-gray-600">
+                    Try getting followers (may fail due to API restrictions):
+                  </p>
+                  <Button
+                    onClick={getFollowers}
+                    disabled={isLoadingFollowers || !configStatus?.isConfigured}
+                    variant="outline"
+                  >
+                    {isLoadingFollowers ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      <>
+                        <Users className="w-4 h-4 mr-2" />
+                        Try Get Followers
+                      </>
+                    )}
+                  </Button>
+                </div>
+
+                <div className="border-t pt-4">
+                  <Label htmlFor="manualUserId">Enter Your User ID Manually</Label>
+                  <div className="flex space-x-2 mt-2">
+                    <Input
+                      id="manualUserId"
+                      placeholder="U1234567890abcdef1234567890abcdef"
+                      value={followerSearch}
+                      onChange={(e) => setFollowerSearch(e.target.value)}
+                      className="flex-1"
+                    />
+                    <Button
+                      onClick={() => {
+                        if (followerSearch && followerSearch.startsWith('U') && followerSearch.length === 33) {
+                          setLineUserId(followerSearch);
+                          toast({
+                            title: "User ID Set!",
+                            description: "Manual User ID has been set for testing",
+                            duration: 3000
+                          });
+                        } else {
+                          toast({
+                            title: "Invalid Format",
+                            description: "User ID must start with 'U' and be 33 characters long",
+                            variant: "destructive",
+                            duration: 3000
+                          });
+                        }
+                      }}
+                      disabled={!followerSearch}
+                    >
+                      Use This ID
+                    </Button>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Format: U + 32 hex characters (total 33 characters)
+                  </p>
+                </div>
               </div>
 
               {followers.length > 0 && (
@@ -508,15 +556,43 @@ U3234567890abcdef1234567890abcdef,Hello Customer 3`}
               {followers.length === 0 && !isLoadingFollowers && (
                 <Alert>
                   <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>No Followers Found</AlertTitle>
+                  <AlertTitle>Alternative Ways to Get Your User ID</AlertTitle>
                   <AlertDescription>
-                    <div className="space-y-2">
-                      <p>To get your User ID:</p>
-                      <ol className="list-decimal list-inside text-sm space-y-1">
-                        <li>Add your LINE Official Account as a friend on your personal LINE app</li>
-                        <li>Click "Get Followers" above to retrieve all follower IDs</li>
-                        <li>Find your User ID in the list and click "Use for Testing"</li>
-                      </ol>
+                    <div className="space-y-3">
+                      <p className="text-sm">The LINE API follower endpoint requires special permissions. Here are other ways to get your User ID:</p>
+                      
+                      <div className="space-y-2">
+                        <p className="font-medium text-sm">Method 1: Use LINE Official Account Manager</p>
+                        <ol className="list-decimal list-inside text-sm space-y-1 ml-2">
+                          <li>Go to LINE Official Account Manager</li>
+                          <li>Navigate to Settings → Messaging API</li>
+                          <li>Look for webhook events or user interaction logs</li>
+                        </ol>
+                      </div>
+
+                      <div className="space-y-2">
+                        <p className="font-medium text-sm">Method 2: Enable Webhook Logging (Recommended)</p>
+                        <ol className="list-decimal list-inside text-sm space-y-1 ml-2">
+                          <li>Add your bot as a friend on your personal LINE</li>
+                          <li>Send any message to your bot (e.g., "Hello")</li>
+                          <li>Check the server console below - your User ID will be logged with "=== LINE USER ID DETECTED ==="</li>
+                          <li>Set your webhook URL to: <code className="bg-gray-100 px-1 rounded text-xs">{window.location.origin}/api/line/webhook</code></li>
+                        </ol>
+                        <Alert className="mt-2">
+                          <AlertCircle className="h-4 w-4" />
+                          <AlertDescription>
+                            <strong>Webhook URL:</strong> <code className="bg-gray-100 px-1 rounded text-xs">{window.location.origin}/api/line/webhook</code>
+                            <br />
+                            <span className="text-xs">Copy this URL and set it in your LINE Developers Console → Messaging API → Webhook URL</span>
+                          </AlertDescription>
+                        </Alert>
+                      </div>
+
+                      <div className="space-y-2">
+                        <p className="font-medium text-sm">Method 3: Use a Test User ID Format</p>
+                        <p className="text-sm ml-2">LINE User IDs follow this format: <code className="bg-gray-100 px-1 rounded">U + 32 hex characters</code></p>
+                        <p className="text-sm ml-2">Example: <code className="bg-gray-100 px-1 rounded">U1234567890abcdef1234567890abcdef</code></p>
+                      </div>
                     </div>
                   </AlertDescription>
                 </Alert>

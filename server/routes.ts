@@ -278,6 +278,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // LINE Webhook handler - captures User IDs when users interact with bot
+  app.post("/api/line/webhook", (req, res) => {
+    try {
+      const events = req.body.events || [];
+      
+      for (const event of events) {
+        if (event.source && event.source.userId) {
+          console.log("=== LINE USER ID DETECTED ===");
+          console.log(`User ID: ${event.source.userId}`);
+          console.log(`Event Type: ${event.type}`);
+          if (event.message) {
+            console.log(`Message: ${event.message.text || event.message.type}`);
+          }
+          console.log("=============================");
+        }
+      }
+      
+      // LINE expects a 200 response
+      res.status(200).send('OK');
+    } catch (error) {
+      console.error("Webhook error:", error);
+      res.status(500).send('Webhook Error');
+    }
+  });
+
+  // Get recent webhook logs (User IDs from interactions)
+  app.get("/api/line/recent-users", (req, res) => {
+    // This would typically be stored in a database or cache
+    // For now, we'll return instructions to check console logs
+    res.json({
+      success: true,
+      message: "Check your server console logs for User IDs when users interact with your bot",
+      instructions: [
+        "1. Add your bot as a friend on LINE",
+        "2. Send any message to your bot", 
+        "3. Check the server console - your User ID will be logged",
+        "4. Copy the User ID that appears after '=== LINE USER ID DETECTED ==="
+      ]
+    });
+  });
+
   // Get all follower User IDs
   app.get("/api/line/followers", async (req, res) => {
     try {
