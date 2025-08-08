@@ -86,54 +86,120 @@ export function BulkMessageDialog({
   };
 
   const processBulkMessages = async (queue: MessageQueueItem[]) => {
-    const batchSize = 10; // Process 10 messages at a time
-    const delay = 1000; // 1 second delay between batches
-    
-    for (let i = 0; i < queue.length; i += batchSize) {
-      const batch = queue.slice(i, i + batchSize);
+    // Prepare recipients for bulk send
+    const recipients = queue.map(item => {
+      const message = useCustomMessage 
+        ? customMessage 
+        : selectedTemplate 
+          ? generateMessagePreview(selectedTemplate, item.customer)
+          : '';
       
-      // Process batch
-      for (const item of batch) {
-        setMessageQueue(prev => prev.map(q => 
-          q.customer.id === item.customer.id 
-            ? { ...q, status: 'sending' }
-            : q
-        ));
-        
-        // Simulate API call (replace with actual LINE API)
-        await new Promise(resolve => setTimeout(resolve, 200));
-        
-        // Simulate success/failure (90% success rate)
-        const success = Math.random() > 0.1;
-        
+      return {
+        lineUserId: item.customer.lineUserId,
+        message: message
+      };
+    });
+    
+    // Filter out recipients without LINE User IDs
+    const validRecipients = recipients.filter(r => r.lineUserId);
+    
+    if (validRecipients.length === 0) {
+      toast({
+        title: "No valid recipients",
+        description: "No customers have LINE User IDs configured",
+        variant: "destructive",
+      });
+      setIsSending(false);
+      setCurrentStep('preview');
+      return;
+    }
+    
+    // Update UI to show sending status for all items
+    queue.forEach(item => {
+      setMessageQueue(prev => prev.map(q => 
+        q.customer.id === item.customer.id 
+          ? { ...q, status: 'sending' }
+          : q
+      ));
+    });
+    
+    try {
+      // Call the actual LINE API bulk send endpoint
+      const response = await fetch('/api/line/bulk-message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recipients: validRecipients })
+      });
+      
+      const result = await response.json();
+      
+      if (result.results && Array.isArray(result.results)) {
+        // Update message queue based on actual results
+        result.results.forEach((res: any) => {
+          const queueItem = queue.find(q => q.customer.lineUserId === res.userId);
+          if (queueItem) {
+            setMessageQueue(prev => prev.map(q => 
+              q.customer.id === queueItem.customer.id 
+                ? { 
+                    ...q, 
+                    status: res.success ? 'sent' : 'failed',
+                    error: res.error
+                  }
+                : q
+            ));
+          }
+        });
+      }
+      
+      // Mark customers without LINE IDs as failed
+      queue.forEach(item => {
+        if (!item.customer.lineUserId) {
+          setMessageQueue(prev => prev.map(q => 
+            q.customer.id === item.customer.id 
+              ? { 
+                  ...q, 
+                  status: 'failed',
+                  error: 'No LINE User ID'
+                }
+              : q
+          ));
+        }
+      });
+      
+      const sentCount = result.successful || 0;
+      const failedCount = result.failed || 0;
+      
+      toast({
+        title: "Bulk message complete",
+        description: `${sentCount} messages sent successfully, ${failedCount} failed`,
+        duration: 5000,
+        variant: failedCount > 0 ? "destructive" : "default"
+      });
+    } catch (error: any) {
+      console.error('Bulk send error:', error);
+      
+      // Mark all as failed on network error
+      queue.forEach(item => {
         setMessageQueue(prev => prev.map(q => 
           q.customer.id === item.customer.id 
             ? { 
                 ...q, 
-                status: success ? 'sent' : 'failed',
-                error: success ? undefined : 'Failed to send message'
+                status: 'failed',
+                error: 'Network error'
               }
             : q
         ));
-      }
+      });
       
-      // Delay between batches
-      if (i + batchSize < queue.length) {
-        await new Promise(resolve => setTimeout(resolve, delay));
-      }
+      toast({
+        title: "Bulk send failed",
+        description: error.message || "Failed to send messages",
+        variant: "destructive",
+      });
     }
     
     setIsSending(false);
     setCurrentStep('complete');
-    
-    const sentCount = queue.filter(q => q.status === 'sent').length;
-    const failedCount = queue.filter(q => q.status === 'failed').length;
-    
-    toast({
-      title: "Bulk message complete",
-      description: `${sentCount} messages sent successfully, ${failedCount} failed`,
-      duration: 5000,
-    });
   };
 
   const handleClose = () => {
