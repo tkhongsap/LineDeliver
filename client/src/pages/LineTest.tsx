@@ -27,6 +27,9 @@ export default function LineTest() {
   const [isSending, setIsSending] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<any>(null);
   const [configStatus, setConfigStatus] = useState<any>(null);
+  const [followers, setFollowers] = useState<string[]>([]);
+  const [isLoadingFollowers, setIsLoadingFollowers] = useState(false);
+  const [followerSearch, setFollowerSearch] = useState("");
   const { toast } = useToast();
 
   // Check LINE API configuration status
@@ -44,6 +47,39 @@ export default function LineTest() {
       }
     } catch (error) {
       console.error("Failed to check status:", error);
+    }
+  };
+
+  // Get all followers
+  const getFollowers = async () => {
+    setIsLoadingFollowers(true);
+    try {
+      const response = await fetch("/api/line/followers");
+      const data = await response.json();
+
+      if (data.success) {
+        setFollowers(data.followers || []);
+        toast({
+          title: "Followers Retrieved!",
+          description: `Found ${data.totalCount} followers`,
+          duration: 5000
+        });
+      } else {
+        toast({
+          title: "Failed to Get Followers",
+          description: data.error || "Unknown error occurred",
+          variant: "destructive",
+          duration: 5000
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Network Error",
+        description: "Failed to connect to server",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoadingFollowers(false);
     }
   };
 
@@ -254,7 +290,7 @@ export default function LineTest() {
 
       {/* Message Testing Tabs */}
       <Tabs defaultValue="single" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="single">
             <TestTube className="w-4 h-4 mr-2" />
             Single Message
@@ -262,6 +298,10 @@ export default function LineTest() {
           <TabsTrigger value="bulk">
             <Users className="w-4 h-4 mr-2" />
             Bulk Messages
+          </TabsTrigger>
+          <TabsTrigger value="followers">
+            <Users className="w-4 h-4 mr-2" />
+            Find Your User ID
           </TabsTrigger>
         </TabsList>
 
@@ -367,6 +407,120 @@ U3234567890abcdef1234567890abcdef,Hello Customer 3`}
                   </>
                 )}
               </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Find Your User ID Tab */}
+        <TabsContent value="followers">
+          <Card>
+            <CardHeader>
+              <CardTitle>Find Your User ID</CardTitle>
+              <CardDescription>
+                Get all follower IDs to find your personal LINE User ID for testing
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-gray-600">
+                  Click "Get Followers" to retrieve all User IDs who have added your bot as a friend.
+                  Your personal User ID will be in this list.
+                </p>
+                <Button
+                  onClick={getFollowers}
+                  disabled={isLoadingFollowers || !configStatus?.isConfigured}
+                  variant="outline"
+                >
+                  {isLoadingFollowers ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    <>
+                      <Users className="w-4 h-4 mr-2" />
+                      Get Followers
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              {followers.length > 0 && (
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="followerSearch">Search User IDs</Label>
+                    <Input
+                      id="followerSearch"
+                      placeholder="Search or filter User IDs..."
+                      value={followerSearch}
+                      onChange={(e) => setFollowerSearch(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="border rounded-lg p-4 max-h-96 overflow-y-auto">
+                    <p className="text-sm font-medium text-gray-700 mb-3">
+                      Found {followers.length} followers:
+                    </p>
+                    <div className="space-y-2">
+                      {followers
+                        .filter(userId => 
+                          followerSearch === "" || 
+                          userId.toLowerCase().includes(followerSearch.toLowerCase())
+                        )
+                        .map((userId, index) => (
+                          <div 
+                            key={index}
+                            className="flex items-center justify-between bg-gray-50 p-3 rounded border"
+                          >
+                            <code className="text-sm font-mono flex-1">
+                              {userId}
+                            </code>
+                            <Button
+                              onClick={() => {
+                                setLineUserId(userId);
+                                toast({
+                                  title: "User ID Copied!",
+                                  description: "User ID has been set for testing",
+                                  duration: 3000
+                                });
+                              }}
+                              size="sm"
+                              variant="outline"
+                            >
+                              Use for Testing
+                            </Button>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+
+                  {followers.filter(userId => 
+                    followerSearch === "" || 
+                    userId.toLowerCase().includes(followerSearch.toLowerCase())
+                  ).length === 0 && (
+                    <p className="text-sm text-gray-500 text-center py-4">
+                      No User IDs match your search.
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {followers.length === 0 && !isLoadingFollowers && (
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>No Followers Found</AlertTitle>
+                  <AlertDescription>
+                    <div className="space-y-2">
+                      <p>To get your User ID:</p>
+                      <ol className="list-decimal list-inside text-sm space-y-1">
+                        <li>Add your LINE Official Account as a friend on your personal LINE app</li>
+                        <li>Click "Get Followers" above to retrieve all follower IDs</li>
+                        <li>Find your User ID in the list and click "Use for Testing"</li>
+                      </ol>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

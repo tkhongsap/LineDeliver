@@ -10,7 +10,8 @@ import {
   validateLineUserId, 
   getConfigStatus,
   testConnection,
-  sendBulkMessages
+  sendBulkMessages,
+  getAllFollowerIds
 } from "./services/line-service";
 
 // Configure multer for file uploads
@@ -273,6 +274,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         success: false,
         error: error.message || "Failed to send message" 
+      });
+    }
+  });
+
+  // Get all follower User IDs
+  app.get("/api/line/followers", async (req, res) => {
+    try {
+      const result = await getAllFollowerIds();
+      
+      if (result.success) {
+        res.json({
+          success: true,
+          followers: result.userIds,
+          totalCount: result.totalCount
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          error: result.error
+        });
+      }
+    } catch (error: any) {
+      console.error("Error getting followers:", error);
+      res.status(500).json({ 
+        success: false,
+        error: error.message || "Failed to get followers" 
       });
     }
   });

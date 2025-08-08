@@ -168,3 +168,43 @@ export async function testConnection(): Promise<{
     };
   }
 }
+
+/**
+ * Get all follower User IDs for the LINE bot
+ * This helps users find their own User ID after adding the bot as a friend
+ */
+export async function getAllFollowerIds(): Promise<{
+  success: boolean;
+  userIds?: string[];
+  totalCount?: number;
+  error?: string;
+}> {
+  try {
+    if (!config.channelAccessToken) {
+      throw new Error('LINE_CHANNEL_ACCESS_TOKEN is not configured');
+    }
+
+    // Use LINE SDK's follower API - returns array of user IDs directly
+    const userIds = await lineClient.getBotFollowersIds();
+    
+    return {
+      success: true,
+      userIds: userIds,
+      totalCount: userIds.length
+    };
+  } catch (error: any) {
+    console.error('Failed to get follower IDs:', error);
+    
+    let errorMessage = 'Failed to get follower IDs';
+    if (error.response?.data?.message) {
+      errorMessage = error.response.data.message;
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    return {
+      success: false,
+      error: errorMessage
+    };
+  }
+}
